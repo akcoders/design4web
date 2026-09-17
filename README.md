@@ -4,7 +4,7 @@ A custom, motion-first classic WordPress theme created for Design4web.
 
 ## Install
 
-The ready-to-upload archive is [`design4web-studio-1.0.0.zip`](./design4web-studio-1.0.0.zip).
+The ready-to-upload archive is [`design4web-studio-1.1.0.zip`](./design4web-studio-1.1.0.zip).
 
 1. Download the ZIP without extracting it.
 2. In WordPress, open **Appearance → Themes → Add New → Upload Theme**.
@@ -32,6 +32,10 @@ The AJAX form validates and sanitizes all fields, verifies a nonce, and sends to
 - jQuery 4.0.0 (local production build)
 - Bootstrap Icons 1.13.1
 - Custom CSS/JavaScript animations with reduced-motion support
+
+## Motion system
+
+Version 1.1 adds staggered word and card reveals, image-mask entrances, section progress indicators, pointer spotlights, labeled project cursors, button ripples, page transitions and richer hover choreography. The complete motion layer can be switched off in **Appearance → Customize → Design4web Theme Options → Brand & Motion**. Touch devices and visitors using reduced-motion preferences receive optimized fallbacks.
 
 All vendor assets are local except Google Fonts; the theme has system-font fallbacks.
 

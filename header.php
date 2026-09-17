@@ -25,10 +25,14 @@
 <?php endif; ?>
 
 <?php if ( d4w_get_option( 'enable_cursor', true ) ) : ?>
-	<div class="d4w-cursor" aria-hidden="true"><span></span></div>
+	<div class="d4w-cursor" aria-hidden="true"><span class="d4w-cursor-label"></span></div>
 	<div class="d4w-cursor-dot" aria-hidden="true"></div>
 <?php endif; ?>
 <div class="d4w-scroll-progress" aria-hidden="true"></div>
+<?php if ( d4w_get_option( 'enable_motion', true ) ) : ?>
+	<div class="d4w-page-transition" aria-hidden="true"><span>D4W</span></div>
+	<div class="d4w-ambient-grain" aria-hidden="true"></div>
+<?php endif; ?>
 
 <header id="masthead" class="site-header">
 	<div class="container-fluid d4w-header-container">

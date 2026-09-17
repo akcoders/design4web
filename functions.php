@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'D4W_VERSION', '1.0.0' );
+define( 'D4W_VERSION', '1.1.0' );
 define( 'D4W_DIR', get_template_directory() );
 define( 'D4W_URI', get_template_directory_uri() );
 
@@ -421,6 +421,9 @@ add_action( 'after_switch_theme', 'd4w_seed_journal', 20 );
 function d4w_body_classes( $classes ) {
 	if ( d4w_get_option( 'enable_cursor', true ) ) {
 		$classes[] = 'd4w-cursor-enabled';
+	}
+	if ( d4w_get_option( 'enable_motion', true ) ) {
+		$classes[] = 'd4w-motion-enabled';
 	}
 	return $classes;
 }

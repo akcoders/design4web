@@ -16,6 +16,7 @@ function d4w_defaults() {
 		'dark_color'          => '#111522',
 		'enable_preloader'     => true,
 		'enable_cursor'        => true,
+		'enable_motion'        => true,
 		'hero_eyebrow'         => 'INDEPENDENT DIGITAL CREATIVE AGENCY',
 		'hero_title'           => 'We Design Digital Experiences That Make Brands',
 		'hero_highlight'       => 'Impossible To Ignore.',
@@ -101,6 +102,7 @@ function d4w_customize_register( $wp_customize ) {
 	$checkboxes = array(
 		'enable_preloader'  => array( 'Enable animated preloader', 'd4w_brand' ),
 		'enable_cursor'     => array( 'Enable creative desktop cursor', 'd4w_brand' ),
+		'enable_motion'     => array( 'Enable advanced motion effects', 'd4w_brand' ),
 		'show_services'     => array( 'Show services section', 'd4w_home' ),
 		'show_projects'     => array( 'Show projects section', 'd4w_home' ),
 		'show_process'      => array( 'Show process section', 'd4w_home' ),
