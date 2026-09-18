@@ -9,11 +9,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'D4W_VERSION', '1.1.0' );
+define( 'D4W_VERSION', '2.0.0' );
 define( 'D4W_DIR', get_template_directory() );
 define( 'D4W_URI', get_template_directory_uri() );
 
 require_once D4W_DIR . '/inc/customizer.php';
+require_once D4W_DIR . '/inc/template-functions.php';
+require_once D4W_DIR . '/inc/dynamic-content.php';
+require_once D4W_DIR . '/inc/site-setup.php';
 
 function d4w_setup() {
 	load_theme_textdomain( 'design4web', D4W_DIR . '/languages' );
@@ -55,10 +58,6 @@ function d4w_assets() {
 	wp_enqueue_style( 'd4w-style', get_stylesheet_uri(), array( 'd4w-bootstrap' ), D4W_VERSION );
 	wp_enqueue_style( 'd4w-main', D4W_URI . '/assets/css/main.css', array( 'd4w-bootstrap', 'd4w-icons' ), D4W_VERSION );
 
-	if ( ! is_admin() ) {
-		wp_deregister_script( 'jquery' );
-		wp_register_script( 'jquery', D4W_URI . '/assets/vendor/jquery.min.js', array(), '4.0.0', true );
-	}
 	wp_enqueue_script( 'jquery' );
 	wp_enqueue_script( 'd4w-bootstrap', D4W_URI . '/assets/vendor/bootstrap.bundle.min.js', array(), '5.3.8', true );
 	wp_enqueue_script( 'd4w-main', D4W_URI . '/assets/js/main.js', array( 'jquery' ), D4W_VERSION, true );
@@ -182,6 +181,29 @@ function d4w_register_content_types() {
 }
 add_action( 'init', 'd4w_register_content_types' );
 
+/**
+ * Keep public content in the same order editors manage in wp-admin and expose
+ * the complete filterable collections on their archives.
+ *
+ * @param WP_Query $query Current query.
+ */
+function d4w_order_public_archives( $query ) {
+	if ( is_admin() || ! $query->is_main_query() ) {
+		return;
+	}
+
+	if ( $query->is_post_type_archive( 'd4w_service' ) ) {
+		$query->set( 'posts_per_page', -1 );
+		$query->set( 'orderby', array( 'menu_order' => 'ASC', 'date' => 'ASC' ) );
+	}
+
+	if ( $query->is_post_type_archive( 'd4w_project' ) || $query->is_tax( 'd4w_project_type' ) ) {
+		$query->set( 'posts_per_page', -1 );
+		$query->set( 'orderby', array( 'menu_order' => 'ASC', 'date' => 'DESC' ) );
+	}
+}
+add_action( 'pre_get_posts', 'd4w_order_public_archives' );
+
 function d4w_add_meta_boxes() {
 	add_meta_box( 'd4w_service_details', __( 'Service Details', 'design4web' ), 'd4w_service_meta_box', 'd4w_service', 'side' );
 	add_meta_box( 'd4w_project_details', __( 'Project Details', 'design4web' ), 'd4w_project_meta_box', 'd4w_project', 'normal' );
@@ -200,17 +222,39 @@ function d4w_meta_field( $post_id, $key, $label, $type = 'text', $description = 
 	<?php
 }
 
+function d4w_meta_textarea( $post_id, $key, $label, $description = '' ) {
+	$value = get_post_meta( $post_id, $key, true );
+	?>
+	<p>
+		<label for="<?php echo esc_attr( $key ); ?>"><strong><?php echo esc_html( $label ); ?></strong></label><br>
+		<textarea class="widefat" rows="5" id="<?php echo esc_attr( $key ); ?>" name="<?php echo esc_attr( $key ); ?>"><?php echo esc_textarea( $value ); ?></textarea>
+		<?php if ( $description ) : ?><small style="display:block;margin-top:4px"><?php echo esc_html( $description ); ?></small><?php endif; ?>
+	</p>
+	<?php
+}
+
 function d4w_service_meta_box( $post ) {
 	wp_nonce_field( 'd4w_save_meta', 'd4w_meta_nonce' );
 	d4w_meta_field( $post->ID, '_d4w_icon', __( 'Bootstrap icon class', 'design4web' ), 'text', __( 'Example: bi-code-slash', 'design4web' ) );
 	d4w_meta_field( $post->ID, '_d4w_short_label', __( 'Short label', 'design4web' ) );
+	d4w_meta_field( $post->ID, '_d4w_duration', __( 'Typical duration', 'design4web' ), 'text', __( 'Example: 6–10 weeks', 'design4web' ) );
+	d4w_meta_field( $post->ID, '_d4w_starting_price', __( 'Starting price / qualifier', 'design4web' ), 'text', __( 'Example: Scoped after discovery', 'design4web' ) );
+	d4w_meta_textarea( $post->ID, '_d4w_deliverables', __( 'Deliverables', 'design4web' ), __( 'Enter one item per line.', 'design4web' ) );
 }
 
 function d4w_project_meta_box( $post ) {
 	wp_nonce_field( 'd4w_save_meta', 'd4w_meta_nonce' );
 	d4w_meta_field( $post->ID, '_d4w_client', __( 'Client', 'design4web' ) );
-	d4w_meta_field( $post->ID, '_d4w_year', __( 'Year', 'design4web' ), 'number' );
+	d4w_meta_field( $post->ID, '_d4w_year', __( 'Year / period', 'design4web' ), 'text', __( 'Example: 2026 or Archive', 'design4web' ) );
 	d4w_meta_field( $post->ID, '_d4w_url', __( 'Project URL', 'design4web' ), 'url' );
+	d4w_meta_field( $post->ID, '_d4w_industry', __( 'Industry', 'design4web' ) );
+	d4w_meta_field( $post->ID, '_d4w_services', __( 'Services delivered', 'design4web' ), 'text', __( 'Example: Strategy, UX, WordPress', 'design4web' ) );
+	d4w_meta_field( $post->ID, '_d4w_metric_one', __( 'Primary result', 'design4web' ), 'text', __( 'Example: 2.4×', 'design4web' ) );
+	d4w_meta_field( $post->ID, '_d4w_metric_one_label', __( 'Primary result label', 'design4web' ) );
+	d4w_meta_field( $post->ID, '_d4w_metric_two', __( 'Secondary result', 'design4web' ), 'text', __( 'Example: 58%', 'design4web' ) );
+	d4w_meta_field( $post->ID, '_d4w_metric_two_label', __( 'Secondary result label', 'design4web' ) );
+	d4w_meta_textarea( $post->ID, '_d4w_challenge', __( 'Challenge', 'design4web' ) );
+	d4w_meta_textarea( $post->ID, '_d4w_outcome', __( 'Outcome', 'design4web' ) );
 }
 
 function d4w_testimonial_meta_box( $post ) {
@@ -223,24 +267,59 @@ function d4w_save_meta( $post_id ) {
 	if ( ! isset( $_POST['d4w_meta_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['d4w_meta_nonce'] ) ), 'd4w_save_meta' ) ) {
 		return;
 	}
-	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+	if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || wp_is_post_revision( $post_id ) ) {
 		return;
 	}
 	if ( ! current_user_can( 'edit_post', $post_id ) ) {
 		return;
 	}
-	$fields = array(
-		'_d4w_icon'        => 'sanitize_html_class',
-		'_d4w_short_label' => 'sanitize_text_field',
-		'_d4w_client'      => 'sanitize_text_field',
-		'_d4w_year'        => 'absint',
-		'_d4w_url'         => 'esc_url_raw',
-		'_d4w_role'        => 'sanitize_text_field',
-		'_d4w_rating'      => 'absint',
+	$field_groups = array(
+		'd4w_service' => array(
+			'_d4w_icon'           => 'sanitize_html_class',
+			'_d4w_short_label'    => 'sanitize_text_field',
+			'_d4w_duration'       => 'sanitize_text_field',
+			'_d4w_starting_price' => 'sanitize_text_field',
+			'_d4w_deliverables'   => 'sanitize_textarea_field',
+		),
+		'd4w_project' => array(
+			'_d4w_client'           => 'sanitize_text_field',
+			'_d4w_year'             => 'sanitize_text_field',
+			'_d4w_url'              => 'esc_url_raw',
+			'_d4w_industry'         => 'sanitize_text_field',
+			'_d4w_services'         => 'sanitize_text_field',
+			'_d4w_metric_one'       => 'sanitize_text_field',
+			'_d4w_metric_one_label' => 'sanitize_text_field',
+			'_d4w_metric_two'       => 'sanitize_text_field',
+			'_d4w_metric_two_label' => 'sanitize_text_field',
+			'_d4w_challenge'        => 'sanitize_textarea_field',
+			'_d4w_outcome'          => 'sanitize_textarea_field',
+		),
+		'd4w_testimonial' => array(
+			'_d4w_role'   => 'sanitize_text_field',
+			'_d4w_rating' => 'absint',
+		),
 	);
+	$post_type = get_post_type( $post_id );
+	if ( ! isset( $field_groups[ $post_type ] ) ) {
+		return;
+	}
+	$fields = $field_groups[ $post_type ];
 	foreach ( $fields as $key => $callback ) {
 		if ( isset( $_POST[ $key ] ) ) {
-			update_post_meta( $post_id, $key, call_user_func( $callback, wp_unslash( $_POST[ $key ] ) ) );
+			$raw = wp_unslash( $_POST[ $key ] );
+			if ( '' === trim( (string) $raw ) ) {
+				delete_post_meta( $post_id, $key );
+				continue;
+			}
+			$value = call_user_func( $callback, $raw );
+			if ( '_d4w_rating' === $key ) {
+				$value = min( 5, max( 1, (int) $value ) );
+			}
+			if ( '' === $value || 0 === $value ) {
+				delete_post_meta( $post_id, $key );
+			} else {
+				update_post_meta( $post_id, $key, $value );
+			}
 		}
 	}
 }
@@ -248,12 +327,12 @@ add_action( 'save_post', 'd4w_save_meta' );
 
 function d4w_primary_menu_fallback( $args = null ) {
 	$items = array(
-		__( 'Home', 'design4web' )     => '#home',
-		__( 'About', 'design4web' )    => '#about',
-		__( 'Services', 'design4web' ) => '#services',
-		__( 'Work', 'design4web' )     => '#work',
-		__( 'Process', 'design4web' )  => '#process',
-		__( 'Contact', 'design4web' )  => '#contact',
+		__( 'Home', 'design4web' )     => home_url( '/' ),
+		__( 'About', 'design4web' )    => d4w_page_url( 'about' ),
+		__( 'Services', 'design4web' ) => get_post_type_archive_link( 'd4w_service' ) ?: home_url( '/services/' ),
+		__( 'Work', 'design4web' )     => get_post_type_archive_link( 'd4w_project' ) ?: home_url( '/work/' ),
+		__( 'Journal', 'design4web' )  => d4w_page_url( 'journal' ),
+		__( 'Contact', 'design4web' )  => d4w_page_url( 'contact' ),
 	);
 	$menu_class = 'navbar-nav flex-row align-items-center';
 	if ( is_object( $args ) && ! empty( $args->menu_class ) ) {
@@ -263,7 +342,7 @@ function d4w_primary_menu_fallback( $args = null ) {
 	}
 	echo '<ul class="' . esc_attr( $menu_class ) . '">';
 	foreach ( $items as $label => $url ) {
-		echo '<li class="menu-item"><a href="' . esc_url( home_url( '/' ) . $url ) . '">' . esc_html( $label ) . '</a></li>';
+		echo '<li class="menu-item"><a href="' . esc_url( $url ) . '">' . esc_html( $label ) . '</a></li>';
 	}
 	echo '</ul>';
 }
@@ -277,26 +356,45 @@ function d4w_contact_form_handler() {
 	if ( ! check_ajax_referer( 'd4w_contact', 'nonce', false ) ) {
 		wp_send_json_error( array( 'message' => __( 'Security check failed. Refresh and try again.', 'design4web' ) ), 403 );
 	}
+	if ( ! empty( $_POST['website'] ) ) {
+		wp_send_json_success( array( 'message' => __( 'Thank you! Your message has been received.', 'design4web' ) ) );
+	}
 
 	$name    = isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '';
 	$email   = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
 	$phone   = isset( $_POST['phone'] ) ? sanitize_text_field( wp_unslash( $_POST['phone'] ) ) : '';
 	$service = isset( $_POST['service'] ) ? sanitize_text_field( wp_unslash( $_POST['service'] ) ) : '';
+	$budget  = isset( $_POST['budget'] ) ? sanitize_text_field( wp_unslash( $_POST['budget'] ) ) : '';
+	$timeline= isset( $_POST['timeline'] ) ? sanitize_text_field( wp_unslash( $_POST['timeline'] ) ) : '';
+	$source  = isset( $_POST['source'] ) ? sanitize_key( wp_unslash( $_POST['source'] ) ) : 'website';
 	$message = isset( $_POST['message'] ) ? sanitize_textarea_field( wp_unslash( $_POST['message'] ) ) : '';
 
-	if ( ! $name || ! is_email( $email ) || ! $message ) {
+	if ( ! $name || ! is_email( $email ) || ! $message || strlen( $message ) > 5000 ) {
 		wp_send_json_error( array( 'message' => __( 'Please complete all required fields.', 'design4web' ) ), 422 );
+	}
+
+	$remote_address = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : 'unknown';
+	$rate_key       = 'd4w_enquiry_' . md5( strtolower( $email ) . '|' . $remote_address );
+	$rate_count     = (int) get_transient( $rate_key );
+	if ( $rate_count >= 3 ) {
+		wp_send_json_error( array( 'message' => __( 'Too many requests. Please wait a few minutes or contact us by phone.', 'design4web' ) ), 429 );
+	}
+	set_transient( $rate_key, $rate_count + 1, 10 * MINUTE_IN_SECONDS );
+
+	$inquiry = d4w_store_inquiry(
+		compact( 'name', 'email', 'phone', 'service', 'budget', 'timeline', 'source', 'message' )
+	);
+	if ( is_wp_error( $inquiry ) ) {
+		wp_send_json_error( array( 'message' => __( 'Your enquiry could not be saved. Please email or WhatsApp us.', 'design4web' ) ), 500 );
 	}
 
 	$recipient = sanitize_email( d4w_get_option( 'contact_email', get_option( 'admin_email' ) ) );
 	$subject   = sprintf( __( 'New website enquiry from %s', 'design4web' ), $name );
-	$body      = "Name: {$name}\nEmail: {$email}\nPhone: {$phone}\nService: {$service}\n\nMessage:\n{$message}";
+	$body      = "Name: {$name}\nEmail: {$email}\nPhone: {$phone}\nService: {$service}\nBudget: {$budget}\nTimeline: {$timeline}\nSource: {$source}\n\nMessage:\n{$message}";
 	$headers   = array( 'Reply-To: ' . $name . ' <' . $email . '>' );
 
-	if ( wp_mail( $recipient, $subject, $body, $headers ) ) {
-		wp_send_json_success( array( 'message' => __( 'Thank you! Your message has been sent.', 'design4web' ) ) );
-	}
-	wp_send_json_error( array( 'message' => __( 'Message could not be sent. Please email or WhatsApp us.', 'design4web' ) ), 500 );
+	wp_mail( $recipient, $subject, $body, $headers );
+	wp_send_json_success( array( 'message' => __( 'Thank you! Your enquiry has been received. We will get back to you shortly.', 'design4web' ) ) );
 }
 add_action( 'wp_ajax_d4w_contact', 'd4w_contact_form_handler' );
 add_action( 'wp_ajax_nopriv_d4w_contact', 'd4w_contact_form_handler' );
@@ -419,11 +517,20 @@ function d4w_seed_journal() {
 add_action( 'after_switch_theme', 'd4w_seed_journal', 20 );
 
 function d4w_body_classes( $classes ) {
-	if ( d4w_get_option( 'enable_cursor', true ) ) {
-		$classes[] = 'd4w-cursor-enabled';
-	}
 	if ( d4w_get_option( 'enable_motion', true ) ) {
 		$classes[] = 'd4w-motion-enabled';
+		if ( d4w_get_option( 'enable_cursor', true ) ) {
+			$classes[] = 'd4w-cursor-enabled';
+		}
+		if ( d4w_get_option( 'enable_page_transitions', true ) ) {
+			$classes[] = 'd4w-page-transition-enabled';
+		}
+		if ( d4w_get_option( 'enable_parallax', true ) ) {
+			$classes[] = 'd4w-parallax-enabled';
+		}
+		if ( d4w_get_option( 'enable_motion_loops', true ) ) {
+			$classes[] = 'd4w-loops-enabled';
+		}
 	}
 	return $classes;
 }
@@ -452,6 +559,10 @@ function d4w_options_page() {
 				array( 'dashicons-superhero-alt', 'Services', 'Add, edit, reorder and illustrate the services shown on the homepage.', admin_url( 'edit.php?post_type=d4w_service' ), 'Manage services' ),
 				array( 'dashicons-portfolio', 'Projects', 'Publish portfolio work, categories, client details, dates and project images.', admin_url( 'edit.php?post_type=d4w_project' ), 'Manage projects' ),
 				array( 'dashicons-format-quote', 'Testimonials', 'Control client quotes, roles, ratings and profile images.', admin_url( 'edit.php?post_type=d4w_testimonial' ), 'Manage testimonials' ),
+				array( 'dashicons-editor-ol', 'Process steps', 'Edit the ordered Discover, Design, Build and Grow workflow used across the website.', admin_url( 'edit.php?post_type=d4w_process' ), 'Manage process' ),
+				array( 'dashicons-editor-help', 'FAQs', 'Create and reorder the questions displayed on the contact page.', admin_url( 'edit.php?post_type=d4w_faq' ), 'Manage FAQs' ),
+				array( 'dashicons-groups', 'Team', 'Add team profiles, roles, biographies, photos and professional links.', admin_url( 'edit.php?post_type=d4w_team' ), 'Manage team' ),
+				array( 'dashicons-email-alt2', 'Enquiries', 'Review every website enquiry and move it through your follow-up workflow.', admin_url( 'edit.php?post_type=d4w_inquiry' ), 'View enquiries' ),
 				array( 'dashicons-menu-alt3', 'Navigation', 'Create menus and assign them to the primary or footer locations.', admin_url( 'nav-menus.php' ), 'Manage menus' ),
 				array( 'dashicons-admin-site-alt3', 'Site identity', 'Upload the final logo and site icon, and edit the website title.', admin_url( 'customize.php?autofocus[section]=title_tagline' ), 'Edit identity' ),
 			);
@@ -465,7 +576,7 @@ function d4w_options_page() {
 				</div>
 			<?php endforeach; ?>
 		</div>
-		<div class="notice notice-info inline" style="max-width:1060px;margin-top:24px"><p><strong><?php esc_html_e( 'Contact form delivery:', 'design4web' ); ?></strong> <?php esc_html_e( 'The form securely uses WordPress mail. Configure an SMTP plugin on the live server for authenticated, reliable delivery.', 'design4web' ); ?></p></div>
+		<div class="notice notice-info inline" style="max-width:1060px;margin-top:24px"><p><strong><?php esc_html_e( 'Contact form delivery:', 'design4web' ); ?></strong> <?php esc_html_e( 'Every valid enquiry is saved under Enquiries before WordPress sends its email notification. Configure authenticated SMTP on the live server for reliable email delivery.', 'design4web' ); ?></p></div>
 	</div>
 	<?php
 }

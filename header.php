@@ -9,6 +9,8 @@
 <head>
 	<meta charset="<?php bloginfo( 'charset' ); ?>">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<script>document.documentElement.classList.add('d4w-js');window.setTimeout(function(){document.documentElement.classList.add('d4w-js-timeout');},4000);</script>
+	<?php if ( ! has_site_icon() ) : ?><link rel="icon" type="image/png" href="<?php echo esc_url( D4W_URI . '/assets/images/logo.png' ); ?>"><?php endif; ?>
 	<?php wp_head(); ?>
 </head>
 <body <?php body_class(); ?>>
@@ -16,7 +18,7 @@
 
 <a class="skip-link screen-reader-text" href="#main-content"><?php esc_html_e( 'Skip to content', 'design4web' ); ?></a>
 
-<?php if ( d4w_get_option( 'enable_preloader', true ) ) : ?>
+<?php if ( d4w_get_option( 'enable_motion', true ) && d4w_get_option( 'enable_preloader', true ) ) : ?>
 	<div class="d4w-preloader" aria-hidden="true">
 		<div class="d4w-preloader__mark">D<span>4</span>W</div>
 		<div class="d4w-preloader__line"><span></span></div>
@@ -24,13 +26,15 @@
 	</div>
 <?php endif; ?>
 
-<?php if ( d4w_get_option( 'enable_cursor', true ) ) : ?>
+<?php if ( d4w_get_option( 'enable_motion', true ) && d4w_get_option( 'enable_cursor', true ) ) : ?>
 	<div class="d4w-cursor" aria-hidden="true"><span class="d4w-cursor-label"></span></div>
 	<div class="d4w-cursor-dot" aria-hidden="true"></div>
 <?php endif; ?>
 <div class="d4w-scroll-progress" aria-hidden="true"></div>
-<?php if ( d4w_get_option( 'enable_motion', true ) ) : ?>
+<?php if ( d4w_get_option( 'enable_motion', true ) && d4w_get_option( 'enable_page_transitions', true ) ) : ?>
 	<div class="d4w-page-transition" aria-hidden="true"><span>D4W</span></div>
+	<?php endif; ?>
+<?php if ( d4w_get_option( 'enable_motion', true ) && d4w_get_option( 'enable_motion_loops', true ) ) : ?>
 	<div class="d4w-ambient-grain" aria-hidden="true"></div>
 <?php endif; ?>
 
@@ -61,7 +65,7 @@
 				?>
 			</nav>
 
-			<a class="d4w-header-cta d-none d-lg-inline-flex magnetic" href="<?php echo esc_url( d4w_get_option( 'hero_button_url', '#contact' ) ); ?>">
+			<a class="d4w-header-cta d-none d-lg-inline-flex magnetic" href="<?php echo esc_url( d4w_page_url( 'contact', home_url( '/#contact' ) ) ); ?>">
 				<span><?php esc_html_e( 'Let’s talk', 'design4web' ); ?></span><i class="bi bi-arrow-up-right"></i>
 			</a>
 
@@ -96,4 +100,4 @@
 	</div>
 </div>
 
-<main id="main-content" class="site-main">
+<main id="main-content" class="site-main" tabindex="-1">

@@ -38,10 +38,17 @@ $image_dir = D4W_URI . '/assets/images/';
 		</div>
 
 		<div class="d4w-hero-gallery hero-reveal">
-			<?php for ( $i = 1; $i <= 4; $i++ ) : ?>
+			<?php
+			$hero_fallbacks = array( 'service-web-design.jpg', 'service-development.jpg', 'service-marketing.jpg', 'service-hosting.jpg' );
+			$hero_services  = get_posts( array( 'post_type' => 'd4w_service', 'post_status' => 'publish', 'posts_per_page' => 4, 'orderby' => array( 'menu_order' => 'ASC', 'date' => 'ASC' ), 'no_found_rows' => true ) );
+			for ( $i = 1; $i <= 4; $i++ ) :
+				$hero_service = isset( $hero_services[ $i - 1 ] ) ? $hero_services[ $i - 1 ] : null;
+				$hero_image   = $hero_service ? d4w_feature_image_url( $hero_service->ID, $hero_fallbacks[ $i - 1 ], 'd4w-service' ) : $image_dir . $hero_fallbacks[ $i - 1 ];
+				$hero_alt     = $hero_service ? $hero_service->post_title : '';
+				?>
 				<div class="d4w-hero-card d4w-parallax" data-speed="<?php echo esc_attr( ( $i % 2 ? 0.025 : -0.018 ) ); ?>">
-					<img src="<?php echo esc_url( $image_dir . array( 1 => 'service-web-design.jpg', 2 => 'service-development.jpg', 3 => 'service-marketing.jpg', 4 => 'service-hosting.jpg' )[ $i ] ); ?>" alt="" width="524" height="546" <?php echo 1 === $i ? 'fetchpriority="high"' : 'loading="lazy"'; ?>>
-					<span>0<?php echo esc_html( $i ); ?></span>
+					<img src="<?php echo esc_url( $hero_image ); ?>" alt="<?php echo esc_attr( $hero_alt ); ?>" width="524" height="546" <?php echo 1 === $i ? 'fetchpriority="high"' : 'loading="lazy"'; ?>>
+					<span><?php echo esc_html( str_pad( (string) $i, 2, '0', STR_PAD_LEFT ) ); ?></span>
 				</div>
 			<?php endfor; ?>
 			<div class="d4w-project-stat"><strong><span class="counter" data-count="<?php echo esc_attr( d4w_get_option( 'projects_count' ) ); ?>">0</span>+</strong><small><?php esc_html_e( 'projects shaped with care', 'design4web' ); ?></small></div>
@@ -53,7 +60,8 @@ $image_dir = D4W_URI . '/assets/images/';
 	<div class="d4w-marquee__track">
 		<?php for ( $i = 0; $i < 2; $i++ ) : ?>
 			<div class="d4w-marquee__group">
-				<span>Web Design <i>✦</i></span><span>Development <i>✦</i></span><span>Brand Identity <i>✦</i></span><span>E-Commerce <i>✦</i></span><span>SEO & Growth <i>✦</i></span><span>Hosting <i>✦</i></span>
+				<?php foreach ( $hero_services as $hero_service ) : ?><span><?php echo esc_html( $hero_service->post_title ); ?> <i>✦</i></span><?php endforeach; ?>
+				<span>Brand Identity <i>✦</i></span><span>Digital Growth <i>✦</i></span>
 			</div>
 		<?php endfor; ?>
 	</div>
@@ -73,7 +81,7 @@ $image_dir = D4W_URI . '/assets/images/';
 				<h2 class="d4w-display reveal-text"><?php echo esc_html( d4w_get_option( 'about_title' ) ); ?></h2>
 				<div class="row mt-5 align-items-end g-4">
 					<div class="col-md-8"><p class="d4w-lead reveal-up"><?php echo esc_html( d4w_get_option( 'about_text' ) ); ?></p></div>
-					<div class="col-md-4 text-md-end"><a class="d4w-text-link reveal-up" href="#services"><?php esc_html_e( 'Discover our capabilities', 'design4web' ); ?><i class="bi bi-arrow-right"></i></a></div>
+					<div class="col-md-4 text-md-end"><a class="d4w-text-link reveal-up" href="<?php echo esc_url( d4w_page_url( 'about' ) ); ?>"><?php esc_html_e( 'Meet Design4web', 'design4web' ); ?><i class="bi bi-arrow-right"></i></a></div>
 				</div>
 			</div>
 		</div>
@@ -92,11 +100,11 @@ $image_dir = D4W_URI . '/assets/images/';
 	<div class="container-fluid d4w-shell">
 		<div class="row align-items-end mb-5 g-4">
 			<div class="col-lg-4"><p class="d4w-section-label d4w-section-label--light reveal-up"><span>02</span><?php esc_html_e( 'What we do', 'design4web' ); ?></p></div>
-			<div class="col-lg-8"><h2 class="d4w-display text-white reveal-text"><?php esc_html_e( 'Everything your brand needs to look sharp and move forward.', 'design4web' ); ?></h2></div>
+			<div class="col-lg-8"><h2 class="d4w-display text-white reveal-text"><?php echo esc_html( d4w_get_option( 'services_title' ) ); ?></h2></div>
 		</div>
 		<div class="d4w-service-list">
 			<?php
-			$service_query = new WP_Query( array( 'post_type' => 'd4w_service', 'posts_per_page' => 8, 'orderby' => array( 'menu_order' => 'ASC', 'date' => 'ASC' ) ) );
+			$service_query = new WP_Query( array( 'post_type' => 'd4w_service', 'posts_per_page' => 8, 'orderby' => array( 'menu_order' => 'ASC', 'date' => 'ASC' ), 'no_found_rows' => true ) );
 			$service_index = 0;
 			while ( $service_query->have_posts() ) :
 				$service_query->the_post();
@@ -124,19 +132,18 @@ $image_dir = D4W_URI . '/assets/images/';
 	<div class="container-fluid d4w-shell">
 		<div class="row align-items-end mb-5 g-4">
 			<div class="col-lg-4"><p class="d4w-section-label reveal-up"><span>03</span><?php esc_html_e( 'Selected work', 'design4web' ); ?></p></div>
-			<div class="col-lg-6"><h2 class="d4w-display reveal-text"><?php esc_html_e( 'Creative work, built to solve real business problems.', 'design4web' ); ?></h2></div>
+			<div class="col-lg-6"><h2 class="d4w-display reveal-text"><?php echo esc_html( d4w_get_option( 'work_title' ) ); ?></h2></div>
 			<div class="col-lg-2 text-lg-end"><a class="d4w-text-link reveal-up" href="<?php echo esc_url( get_post_type_archive_link( 'd4w_project' ) ); ?>"><?php esc_html_e( 'View all work', 'design4web' ); ?><i class="bi bi-arrow-right"></i></a></div>
 		</div>
 
 		<div class="row g-4 d4w-project-grid">
 			<?php
-			$project_query = new WP_Query( array( 'post_type' => 'd4w_project', 'posts_per_page' => 5, 'orderby' => array( 'menu_order' => 'ASC', 'date' => 'DESC' ) ) );
+			$project_query = new WP_Query( array( 'post_type' => 'd4w_project', 'posts_per_page' => 5, 'orderby' => array( 'menu_order' => 'ASC', 'date' => 'DESC' ), 'no_found_rows' => true ) );
 			$project_index = 0;
 			while ( $project_query->have_posts() ) :
 				$project_query->the_post();
 				++$project_index;
-				$fallback = $image_dir . 'project-' . min( $project_index, 5 ) . '.jpg';
-				$image    = has_post_thumbnail() ? get_the_post_thumbnail_url( get_the_ID(), 'd4w-project' ) : $fallback;
+				$image    = d4w_feature_image_url( get_the_ID(), 'project-' . min( $project_index, 5 ) . '.jpg', 'd4w-project' );
 				$terms    = get_the_terms( get_the_ID(), 'd4w_project_type' );
 				$category = $terms && ! is_wp_error( $terms ) ? $terms[0]->name : __( 'Digital Experience', 'design4web' );
 				$layout   = 1 === $project_index || 4 === $project_index ? 'col-lg-7' : 'col-lg-5';
@@ -158,10 +165,10 @@ $image_dir = D4W_URI . '/assets/images/';
 
 <section class="d4w-tech section-space-sm">
 	<div class="container-fluid d4w-shell text-center">
-		<p class="d4w-section-kicker reveal-up"><?php esc_html_e( 'Technology chosen for the job—not the hype', 'design4web' ); ?></p>
-		<h2 class="d4w-display reveal-text"><?php esc_html_e( 'Flexible tools. Reliable results.', 'design4web' ); ?></h2>
+		<p class="d4w-section-kicker reveal-up"><?php echo esc_html( d4w_get_option( 'tech_kicker' ) ); ?></p>
+		<h2 class="d4w-display reveal-text"><?php echo esc_html( d4w_get_option( 'tech_title' ) ); ?></h2>
 		<div class="d4w-tech-cloud reveal-up">
-			<?php foreach ( array( 'WordPress', 'WooCommerce', 'PHP', 'Laravel', 'JavaScript', 'jQuery', 'Bootstrap', 'React', 'MySQL', 'Google Cloud', 'AWS', 'SEO' ) as $tech ) : ?>
+			<?php foreach ( d4w_lines( d4w_get_option( 'tech_list' ) ) as $tech ) : ?>
 				<span><?php echo esc_html( $tech ); ?><i class="bi bi-check2"></i></span>
 			<?php endforeach; ?>
 		</div>
@@ -175,20 +182,18 @@ $image_dir = D4W_URI . '/assets/images/';
 			<div class="col-lg-5">
 				<p class="d4w-section-label d4w-section-label--light reveal-up"><span>04</span><?php esc_html_e( 'Our process', 'design4web' ); ?></p>
 				<h2 class="d4w-display text-white reveal-text"><?php echo esc_html( d4w_get_option( 'process_title' ) ); ?></h2>
-				<p class="d4w-lead text-white-50 reveal-up"><?php esc_html_e( 'A transparent, focused approach keeps the work moving and gives every decision a reason.', 'design4web' ); ?></p>
+				<p class="d4w-lead text-white-50 reveal-up"><?php echo esc_html( d4w_get_option( 'process_text' ) ); ?></p>
 			</div>
 			<div class="col-lg-7">
 				<?php
-				$steps = array(
-					array( '01', 'Discover', 'We listen, research and define the opportunity before deciding what to make.' ),
-					array( '02', 'Design', 'We turn strategy into an expressive system and refine it with you in the room.' ),
-					array( '03', 'Build', 'Clean development, useful integrations and careful testing bring the idea to life.' ),
-					array( '04', 'Grow', 'After launch, we support, measure and improve so the work keeps earning attention.' ),
-				);
-				foreach ( $steps as $step ) :
+				$process_query = new WP_Query( array( 'post_type' => 'd4w_process', 'post_status' => 'publish', 'posts_per_page' => -1, 'orderby' => array( 'menu_order' => 'ASC', 'date' => 'ASC' ), 'no_found_rows' => true ) );
+				while ( $process_query->have_posts() ) :
+					$process_query->the_post();
+					$step_number = get_post_meta( get_the_ID(), '_d4w_process_number', true ) ?: str_pad( (string) ( $process_query->current_post + 1 ), 2, '0', STR_PAD_LEFT );
+					$step_icon   = get_post_meta( get_the_ID(), '_d4w_process_icon', true ) ?: 'bi-arrow-down-right';
 					?>
-					<div class="d4w-process-step reveal-up"><span><?php echo esc_html( $step[0] ); ?></span><h3><?php echo esc_html( $step[1] ); ?></h3><p><?php echo esc_html( $step[2] ); ?></p><i class="bi bi-arrow-down-right"></i></div>
-				<?php endforeach; ?>
+					<div class="d4w-process-step reveal-up"><span><?php echo esc_html( $step_number ); ?></span><h3><?php the_title(); ?></h3><p><?php echo esc_html( d4w_card_excerpt( get_the_ID(), 24 ) ); ?></p><i class="bi <?php echo esc_attr( $step_icon ); ?>"></i></div>
+				<?php endwhile; wp_reset_postdata(); ?>
 			</div>
 		</div>
 	</div>
@@ -196,20 +201,24 @@ $image_dir = D4W_URI . '/assets/images/';
 <?php endif; ?>
 
 <?php if ( d4w_get_option( 'show_testimonials', true ) ) : ?>
+<?php
+$testimonial_cover_posts = get_posts( array( 'post_type' => 'd4w_testimonial', 'post_status' => 'publish', 'posts_per_page' => 1, 'orderby' => array( 'menu_order' => 'ASC', 'date' => 'DESC' ), 'no_found_rows' => true ) );
+$testimonial_cover       = $testimonial_cover_posts ? d4w_feature_image_url( $testimonial_cover_posts[0]->ID, 'testimonial.jpg', 'large' ) : $image_dir . 'testimonial.jpg';
+?>
 <section class="d4w-testimonials section-space">
 	<div class="container-fluid d4w-shell">
 		<div class="row align-items-center g-5">
 			<div class="col-lg-4">
-				<div class="d4w-testimonial-image reveal-up"><img src="<?php echo esc_url( $image_dir . 'testimonial.jpg' ); ?>" alt="<?php esc_attr_e( 'Creative team collaboration', 'design4web' ); ?>" width="542" height="571" loading="lazy"><span><?php esc_html_e( 'Built on trust', 'design4web' ); ?></span></div>
+				<div class="d4w-testimonial-image reveal-up"><img src="<?php echo esc_url( $testimonial_cover ); ?>" alt="<?php esc_attr_e( 'Creative team collaboration', 'design4web' ); ?>" width="542" height="571" loading="lazy"><span><?php esc_html_e( 'Built on trust', 'design4web' ); ?></span></div>
 			</div>
 			<div class="col-lg-8">
 				<div class="d-flex justify-content-between align-items-center mb-4">
 					<p class="d4w-section-label reveal-up"><span>05</span><?php esc_html_e( 'Client stories', 'design4web' ); ?></p>
-					<div class="d4w-slider-controls"><button class="d4w-testimonial-prev" aria-label="<?php esc_attr_e( 'Previous testimonial', 'design4web' ); ?>"><i class="bi bi-arrow-left"></i></button><button class="d4w-testimonial-next" aria-label="<?php esc_attr_e( 'Next testimonial', 'design4web' ); ?>"><i class="bi bi-arrow-right"></i></button></div>
+					<div class="d4w-slider-controls"><button class="d4w-testimonial-prev" aria-label="<?php esc_attr_e( 'Previous testimonial', 'design4web' ); ?>"><i class="bi bi-arrow-left"></i></button><button class="d4w-testimonial-toggle" aria-label="<?php esc_attr_e( 'Pause testimonial autoplay', 'design4web' ); ?>" aria-pressed="false"><i class="bi bi-pause-fill"></i></button><button class="d4w-testimonial-next" aria-label="<?php esc_attr_e( 'Next testimonial', 'design4web' ); ?>"><i class="bi bi-arrow-right"></i></button></div>
 				</div>
 				<div class="d4w-testimonial-track reveal-up">
 					<?php
-					$testimonial_query = new WP_Query( array( 'post_type' => 'd4w_testimonial', 'posts_per_page' => 10, 'orderby' => array( 'menu_order' => 'ASC', 'date' => 'DESC' ) ) );
+					$testimonial_query = new WP_Query( array( 'post_type' => 'd4w_testimonial', 'posts_per_page' => 10, 'orderby' => array( 'menu_order' => 'ASC', 'date' => 'DESC' ), 'no_found_rows' => true ) );
 					while ( $testimonial_query->have_posts() ) :
 						$testimonial_query->the_post();
 						$rating = min( 5, max( 1, (int) get_post_meta( get_the_ID(), '_d4w_rating', true ) ) );
@@ -217,7 +226,7 @@ $image_dir = D4W_URI . '/assets/images/';
 						<article class="d4w-testimonial-slide">
 							<div class="d4w-stars"><?php for ( $star = 0; $star < $rating; $star++ ) : ?><i class="bi bi-star-fill"></i><?php endfor; ?></div>
 							<blockquote>“<?php echo esc_html( wp_strip_all_tags( get_the_content() ) ); ?>”</blockquote>
-							<div class="d4w-testimonial-author"><?php echo get_avatar( get_the_ID(), 64, '', get_the_title() ); ?><div><strong><?php the_title(); ?></strong><span><?php echo esc_html( get_post_meta( get_the_ID(), '_d4w_role', true ) ); ?></span></div></div>
+							<div class="d4w-testimonial-author"><?php if ( has_post_thumbnail() ) : the_post_thumbnail( 'thumbnail', array( 'loading' => 'lazy' ) ); else : ?><span class="d4w-testimonial-avatar" aria-hidden="true"><?php echo esc_html( strtoupper( substr( get_the_title(), 0, 1 ) ) ); ?></span><?php endif; ?><div><strong><?php the_title(); ?></strong><span><?php echo esc_html( get_post_meta( get_the_ID(), '_d4w_role', true ) ); ?></span></div></div>
 						</article>
 					<?php endwhile; wp_reset_postdata(); ?>
 				</div>
@@ -232,12 +241,12 @@ $image_dir = D4W_URI . '/assets/images/';
 	<div class="container-fluid d4w-shell">
 		<div class="row align-items-end mb-5 g-4">
 			<div class="col-lg-4"><p class="d4w-section-label reveal-up"><span>06</span><?php esc_html_e( 'Ideas & insights', 'design4web' ); ?></p></div>
-			<div class="col-lg-6"><h2 class="d4w-display reveal-text"><?php esc_html_e( 'Useful thinking for ambitious digital brands.', 'design4web' ); ?></h2></div>
+			<div class="col-lg-6"><h2 class="d4w-display reveal-text"><?php echo esc_html( d4w_get_option( 'insights_title' ) ); ?></h2></div>
 			<div class="col-lg-2 text-lg-end"><a class="d4w-text-link reveal-up" href="<?php echo esc_url( get_permalink( get_option( 'page_for_posts' ) ) ?: home_url( '/blog/' ) ); ?>"><?php esc_html_e( 'All articles', 'design4web' ); ?><i class="bi bi-arrow-right"></i></a></div>
 		</div>
 		<div class="row g-4">
 			<?php
-			$blog_query = new WP_Query( array( 'post_type' => 'post', 'posts_per_page' => 3, 'ignore_sticky_posts' => true ) );
+			$blog_query = new WP_Query( array( 'post_type' => 'post', 'posts_per_page' => 3, 'ignore_sticky_posts' => true, 'no_found_rows' => true ) );
 			while ( $blog_query->have_posts() ) :
 				$blog_query->the_post();
 				?>
@@ -254,33 +263,6 @@ $image_dir = D4W_URI . '/assets/images/';
 </section>
 <?php endif; ?>
 
-<section id="contact" class="d4w-contact section-space">
-	<div class="container-fluid d4w-shell">
-		<div class="d4w-contact-card">
-			<div class="d4w-contact-shape d4w-parallax" data-speed="0.025"></div>
-			<div class="row g-5 position-relative">
-				<div class="col-lg-6">
-					<p class="d4w-section-label d4w-section-label--light reveal-up"><span>07</span><?php esc_html_e( 'Start a conversation', 'design4web' ); ?></p>
-					<h2 class="d4w-display text-white reveal-text"><?php echo esc_html( d4w_get_option( 'cta_title' ) ); ?></h2>
-					<p class="d4w-lead text-white-50 reveal-up"><?php echo esc_html( d4w_get_option( 'cta_text' ) ); ?></p>
-					<div class="d4w-contact-direct reveal-up"><a href="mailto:<?php echo esc_attr( d4w_get_option( 'contact_email' ) ); ?>"><?php echo esc_html( d4w_get_option( 'contact_email' ) ); ?></a><a href="tel:<?php echo esc_attr( preg_replace( '/[^0-9+]/', '', d4w_get_option( 'phone' ) ) ); ?>"><?php echo esc_html( d4w_get_option( 'phone' ) ); ?></a></div>
-				</div>
-				<div class="col-lg-6">
-					<form id="d4w-contact-form" class="d4w-contact-form reveal-up" novalidate>
-						<input type="hidden" name="action" value="d4w_contact">
-						<div class="row g-3">
-							<div class="col-md-6"><label for="d4w-name"><?php esc_html_e( 'Your name', 'design4web' ); ?> *</label><input id="d4w-name" type="text" name="name" required autocomplete="name"></div>
-							<div class="col-md-6"><label for="d4w-email"><?php esc_html_e( 'Email address', 'design4web' ); ?> *</label><input id="d4w-email" type="email" name="email" required autocomplete="email"></div>
-							<div class="col-md-6"><label for="d4w-phone"><?php esc_html_e( 'Phone number', 'design4web' ); ?></label><input id="d4w-phone" type="tel" name="phone" autocomplete="tel"></div>
-							<div class="col-md-6"><label for="d4w-service"><?php esc_html_e( 'Interested in', 'design4web' ); ?></label><select id="d4w-service" name="service"><option value="Web Design">Web Design</option><option value="Development">Development</option><option value="E-Commerce">E-Commerce</option><option value="SEO & Marketing">SEO & Marketing</option><option value="Domain & Hosting">Domain & Hosting</option></select></div>
-							<div class="col-12"><label for="d4w-message"><?php esc_html_e( 'Tell us about your project', 'design4web' ); ?> *</label><textarea id="d4w-message" name="message" rows="4" required></textarea></div>
-							<div class="col-12 d-flex flex-wrap align-items-center gap-3"><button class="d4w-btn d4w-btn--light magnetic" type="submit"><span><?php esc_html_e( 'Send enquiry', 'design4web' ); ?></span><i class="bi bi-arrow-up-right"></i></button><div class="d4w-form-status" role="status" aria-live="polite"></div></div>
-						</div>
-					</form>
-				</div>
-			</div>
-		</div>
-	</div>
-</section>
+<?php d4w_contact_panel( 'home' ); ?>
 
 <?php get_footer(); ?>

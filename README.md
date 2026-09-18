@@ -1,44 +1,69 @@
 # Design4Web Studio
 
-A custom, motion-first classic WordPress theme created for Design4web.
+A custom, multipage, motion-first WordPress theme built for Design4web. Version 2.0 combines an original high-energy agency design with verified business content and portfolio material from the legacy Design4web website.
 
-## Install
+## Install or update
 
-The ready-to-upload archive is [`design4web-studio-1.1.0.zip`](./design4web-studio-1.1.0.zip).
+The ready-to-upload release is `design4web-studio-2.0.0.zip`.
 
 1. Download the ZIP without extracting it.
-2. In WordPress, open **Appearance → Themes → Add New → Upload Theme**.
-3. Select the ZIP, click **Install Now**, and activate **Design4Web Studio**.
-4. Open **Appearance → Design4web Options** to finish the setup.
+2. Open **WordPress Admin → Appearance → Themes → Add New → Upload Theme**.
+3. Select the ZIP and choose **Install Now**.
+4. If WordPress detects the older theme, choose **Replace current with uploaded**.
+5. Activate it, then open **Settings → Permalinks** and click **Save Changes** once.
+6. Open **Appearance → Design4web Options** for the editing dashboard.
 
-For a manual install, copy this repository into `wp-content/themes/design4web-studio` and activate it in WordPress.
+The theme safely creates Home, About, Contact and Journal pages, configures the front/blog pages when those locations are empty, and creates a proper multipage menu when the previous menu only contains homepage anchors.
 
-## Admin editing
+## Dynamic admin content
 
-- **Appearance → Design4web Options** is the theme dashboard.
-- **Appearance → Customize → Design4web Theme Options** controls colors, animation options, hero/about/CTA copy, statistics, section visibility, phone, email, WhatsApp and social links.
-- **Services**, **Projects** and **Testimonials** are dynamic content types in the WordPress sidebar.
-- Featured images control service/project/client imagery. Project types are editable categories.
-- **Appearance → Menus** controls both the main and footer navigation.
-- **Appearance → Customize → Site Identity** controls the uploaded logo and site icon.
+- **Services** — content, excerpt, icon, label, duration, qualifier, deliverables, image and display order.
+- **Projects** — case-study copy, project types, client, period, industry, services, challenge, outcome, results, optional URL, image and display order.
+- **Testimonials** — quote, client, company/role, rating, photo and order.
+- **Process Steps** — title, description, number, icon and order.
+- **FAQs** — question, answer, category and order.
+- **Team** — name, role, biography, photo, email, LinkedIn and order.
+- **Posts** — the Journal archive and article pages use normal WordPress posts.
+- **Enquiries** — every valid form submission is saved privately for administrators before the email notification is attempted.
 
-## Contact form
+Global colors, section copy, statistics, contact details, social links, section visibility and motion settings are under **Appearance → Customize → Design4web Theme Options**. Navigation is managed under **Appearance → Menus**. Logo and site icon use **Site Identity**.
 
-The AJAX form validates and sanitizes all fields, verifies a nonce, and sends to the email configured in Theme Options. Configure authenticated SMTP on the live server for reliable delivery.
+## Pages and templates
 
-## Front-end stack
-
-- Bootstrap 5.3.8 (local production build)
-- jQuery 4.0.0 (local production build)
-- Bootstrap Icons 1.13.1
-- Custom CSS/JavaScript animations with reduced-motion support
+- Homepage
+- About
+- Services archive and dynamic service detail pages
+- Filterable Work archive and dynamic case studies
+- Journal archive and article pages
+- Contact and FAQ page
+- Standard page, archive, search/404 and comment templates
 
 ## Motion system
 
-Version 1.1 adds staggered word and card reveals, image-mask entrances, section progress indicators, pointer spotlights, labeled project cursors, button ripples, page transitions and richer hover choreography. The complete motion layer can be switched off in **Appearance → Customize → Design4web Theme Options → Brand & Motion**. Touch devices and visitors using reduced-motion preferences receive optimized fallbacks.
+The original motion layer includes a preloader, page transitions, split-word reveals, staggered card entrances, image curtains, expandable service rows, project filtering, parallax, counters, pointer spotlights, magnetic/ripple buttons, custom cursor, testimonial controls and rich hover/focus states.
 
-All vendor assets are local except Google Fonts; the theme has system-font fallbacks.
+Under **Brand & Motion**, administrators can independently control:
 
-## Production note
+- Master advanced motion
+- Animated preloader
+- Page transitions
+- Scroll parallax
+- Decorative looping motion
+- Desktop creative cursor
 
-Configure authenticated SMTP for the enquiry form and confirm commercial usage rights for all demo imagery before making the website public.
+Touch devices receive a lighter motion profile. `prefers-reduced-motion`, keyboard operation, a testimonial pause control and JavaScript-failure fallbacks are included.
+
+## Front-end stack
+
+- Bootstrap 5.3.8, bundled locally
+- Bootstrap Icons 1.13.1, bundled locally
+- WordPress-bundled jQuery for plugin compatibility
+- Original CSS and JavaScript interaction system
+
+## Contact delivery
+
+The AJAX form validates and sanitizes input, verifies a nonce, uses a honeypot and rate limit, saves the enquiry in WordPress, and then sends an email notification. Configure authenticated SMTP on the live server and test delivery after deployment.
+
+## Content and assets
+
+Legacy portfolio imagery in `assets/images/legacy` came from the client-owned Design4web website and is stored locally instead of hotlinked. Assigning a Featured Image to a project replaces its bundled fallback automatically. The Agenca reference informed interaction pacing and hierarchy only; its proprietary theme code and demo assets are not included.

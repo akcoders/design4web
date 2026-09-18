@@ -18,9 +18,13 @@ $socials = array(
 		<div class="row g-5 align-items-start">
 			<div class="col-lg-5">
 				<a class="d4w-logo d4w-footer-logo" href="<?php echo esc_url( home_url( '/' ) ); ?>">
-					<img src="<?php echo esc_url( D4W_URI . '/assets/images/logo.png' ); ?>" width="326" height="77" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>">
+					<?php if ( has_custom_logo() ) : ?>
+						<?php echo wp_get_attachment_image( get_theme_mod( 'custom_logo' ), 'full', false, array( 'class' => 'custom-logo', 'alt' => get_bloginfo( 'name' ) ) ); ?>
+					<?php else : ?>
+						<img src="<?php echo esc_url( D4W_URI . '/assets/images/logo.png' ); ?>" width="326" height="77" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>">
+					<?php endif; ?>
 				</a>
-				<p class="footer-intro"><?php esc_html_e( 'Websites, brands and digital systems created with curiosity, precision and a very human point of view.', 'design4web' ); ?></p>
+				<p class="footer-intro"><?php echo esc_html( d4w_get_option( 'footer_intro' ) ); ?></p>
 			</div>
 			<div class="col-6 col-lg-2 offset-lg-1">
 				<p class="footer-label"><?php esc_html_e( 'Explore', 'design4web' ); ?></p>
