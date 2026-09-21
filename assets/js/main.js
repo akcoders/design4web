@@ -207,8 +207,7 @@
       '.d4w-process-step h3',
       '.d4w-timeline__item h3',
       '.d4w-post-card h2 a',
-      '.d4w-post-card h3 a',
-      '.d4w-testimonial-slide blockquote'
+      '.d4w-post-card h3 a'
     ];
 
     document.querySelectorAll(selectors.join(',')).forEach(function (element) {
@@ -709,66 +708,274 @@
     });
   }
 
-  function initTestimonials() {
-    var $slides = $('.d4w-testimonial-slide');
-    if (!$slides.length) return;
-    var $track = $('.d4w-testimonial-track');
-    var index = 0;
-    var timer;
-    var inView = false;
-    var paused = false;
-    var userPaused = false;
-    var coarsePointer = window.matchMedia('(hover: none), (pointer: coarse)').matches;
-    var $region = $track.closest('.d4w-testimonials');
-    var $toggle = $('.d4w-testimonial-toggle');
+  var googleMapsLoader;
 
-    function updateHeight() {
-      var height = $slides.eq(index).outerHeight(true);
-      if (height) $track.css('height', height + 'px');
+  function safeExternalUrl(value) {
+    if (!value) return '';
+    try {
+      var parsed = new URL(value, window.location.href);
+      return parsed.protocol === 'https:' || parsed.protocol === 'http:' ? parsed.href : '';
+    } catch (error) {
+      return '';
     }
+  }
 
-    function show(next) {
-      var oldIndex = index;
-      index = (next + $slides.length) % $slides.length;
-      if (oldIndex === index && $slides.eq(index).hasClass('is-active')) return;
-      $slides.eq(oldIndex).addClass('is-leaving').removeClass('is-active');
-      window.setTimeout(function () { $slides.eq(oldIndex).removeClass('is-leaving'); }, 550);
-      $slides.eq(index).addClass('is-active');
-      window.requestAnimationFrame(updateHeight);
+  function loadGoogleMaps(config) {
+    if (window.google && window.google.maps && window.google.maps.importLibrary) {
+      return Promise.resolve(window.google.maps);
     }
+    if (googleMapsLoader) return googleMapsLoader;
 
-    function restart() {
-      window.clearInterval(timer);
-      if (motionEnabled && !coarsePointer && inView && !paused && !userPaused && !document.hidden && $slides.length > 1) {
-        timer = window.setInterval(function () { show(index + 1); }, 6500);
-      }
-    }
+    googleMapsLoader = new Promise(function (resolve, reject) {
+      var callbackName = 'd4wGoogleMapsReady';
+      var script = document.createElement('script');
+      var params = new URLSearchParams({
+        key: config.apiKey,
+        loading: 'async',
+        libraries: 'places',
+        callback: callbackName,
+        v: 'weekly',
+        language: config.language || 'en',
+        region: config.region || 'IN',
+        auth_referrer_policy: 'origin'
+      });
 
-    show(0);
-    $('.d4w-testimonial-next').on('click', function () { show(index + 1); restart(); });
-    $('.d4w-testimonial-prev').on('click', function () { show(index - 1); restart(); });
-    $toggle.toggle(!coarsePointer && motionEnabled).on('click', function () {
-      userPaused = !userPaused;
-      $(this).attr('aria-pressed', userPaused ? 'true' : 'false')
-        .attr('aria-label', userPaused ? 'Resume testimonial autoplay' : 'Pause testimonial autoplay')
-        .find('i').toggleClass('bi-pause-fill', !userPaused).toggleClass('bi-play-fill', userPaused);
-      restart();
+      window[callbackName] = function () {
+        delete window[callbackName];
+        resolve(window.google.maps);
+      };
+      script.src = 'https://maps.googleapis.com/maps/api/js?' + params.toString();
+      script.async = true;
+      script.onerror = function () {
+        delete window[callbackName];
+        reject(new Error('Google Maps could not load.'));
+      };
+      document.head.appendChild(script);
     });
-    $region.on('mouseenter focusin', function () { paused = true; restart(); });
-    $region.on('mouseleave focusout', function () { paused = false; restart(); });
-    $(document).on('visibilitychange', restart);
-    $window.on('resize', updateHeight);
 
-    if ('IntersectionObserver' in window) {
-      var observer = new IntersectionObserver(function (entries) {
-        inView = entries[0].isIntersecting;
-        restart();
-      }, { threshold: 0.2 });
-      observer.observe($track[0]);
-    } else {
-      inView = true;
-      restart();
+    return googleMapsLoader;
+  }
+
+  function createReviewStars(rating) {
+    var stars = document.createElement('div');
+    var rounded = Math.max(0, Math.min(5, Math.round(Number(rating) || 0)));
+    stars.className = 'd4w-stars';
+    stars.setAttribute('aria-label', rounded + ' out of 5 stars');
+    for (var index = 0; index < 5; index += 1) {
+      var star = document.createElement('i');
+      star.className = 'bi ' + (index < rounded ? 'bi-star-fill' : 'bi-star');
+      star.setAttribute('aria-hidden', 'true');
+      stars.appendChild(star);
     }
+    return stars;
+  }
+
+  function createGoogleReviewCard(review) {
+    var card = document.createElement('article');
+    var top = document.createElement('div');
+    var quoteIcon = document.createElement('i');
+    var quote = document.createElement('blockquote');
+    var author = document.createElement('div');
+    var authorLink = document.createElement('a');
+    var authorDetails = document.createElement('div');
+    var authorName = document.createElement('strong');
+    var reviewTime = document.createElement('span');
+    var sourceLink = document.createElement('a');
+    var sourceIcon = document.createElement('i');
+    var attribution = review.authorAttribution || {};
+    var authorUrl = safeExternalUrl(attribution.uri);
+    var photoUrl = safeExternalUrl(attribution.photoURI);
+    var reviewUrl = safeExternalUrl(review.googleMapsURI);
+    var displayedText = review.originalText || review.text || '';
+
+    card.className = 'd4w-testimonial-slide d4w-review-card d4w-google-review-card';
+    top.className = 'd4w-review-card__top';
+    quoteIcon.className = 'bi bi-google';
+    quoteIcon.setAttribute('aria-hidden', 'true');
+    top.appendChild(createReviewStars(review.rating));
+    top.appendChild(quoteIcon);
+
+    quote.textContent = '“' + displayedText + '”';
+
+    author.className = 'd4w-testimonial-author';
+    if (authorUrl || reviewUrl) {
+      authorLink.href = authorUrl || reviewUrl;
+      authorLink.target = '_blank';
+      authorLink.rel = 'noopener noreferrer';
+    }
+    authorLink.setAttribute('aria-label', (attribution.displayName || 'Google reviewer') + ' on Google Maps');
+
+    if (photoUrl) {
+      var avatar = document.createElement('img');
+      avatar.src = photoUrl;
+      avatar.alt = '';
+      avatar.width = 54;
+      avatar.height = 54;
+      avatar.loading = 'lazy';
+      avatar.addEventListener('error', function () {
+        var fallbackAvatar = document.createElement('span');
+        fallbackAvatar.className = 'd4w-testimonial-avatar';
+        fallbackAvatar.setAttribute('aria-hidden', 'true');
+        fallbackAvatar.textContent = (attribution.displayName || 'G').charAt(0).toUpperCase();
+        avatar.replaceWith(fallbackAvatar);
+      });
+      authorLink.appendChild(avatar);
+    } else {
+      var initial = document.createElement('span');
+      initial.className = 'd4w-testimonial-avatar';
+      initial.setAttribute('aria-hidden', 'true');
+      initial.textContent = (attribution.displayName || 'G').charAt(0).toUpperCase();
+      authorLink.appendChild(initial);
+    }
+
+    authorName.textContent = attribution.displayName || 'Google reviewer';
+    reviewTime.textContent = review.relativePublishTimeDescription || 'Google review';
+    authorDetails.appendChild(authorName);
+    authorDetails.appendChild(reviewTime);
+    authorLink.appendChild(authorDetails);
+    author.appendChild(authorLink);
+
+    if (reviewUrl) {
+      sourceLink.className = 'd4w-review-source-link';
+      sourceLink.href = reviewUrl;
+      sourceLink.target = '_blank';
+      sourceLink.rel = 'noopener noreferrer';
+      sourceLink.setAttribute('aria-label', 'View original review on Google Maps');
+      sourceLink.textContent = 'Original';
+      sourceIcon.className = 'bi bi-arrow-up-right';
+      sourceIcon.setAttribute('aria-hidden', 'true');
+      sourceLink.appendChild(sourceIcon);
+      author.appendChild(sourceLink);
+    }
+
+    card.appendChild(top);
+    card.appendChild(quote);
+    card.appendChild(author);
+    return card;
+  }
+
+  function initGoogleReviews() {
+    var track = document.querySelector('[data-google-reviews-track]');
+    var config = window.d4wTheme && window.d4wTheme.googleReviews;
+    if (!track || !config || !config.enabled || !config.apiKey || !config.placeId) return;
+
+    var status = document.querySelector('[data-google-review-status]');
+    track.setAttribute('aria-busy', 'true');
+    loadGoogleMaps(config).then(function () {
+      return window.google.maps.importLibrary('places');
+    }).then(function (placesLibrary) {
+      var place = new placesLibrary.Place({ id: config.placeId });
+      return place.fetchFields({
+        fields: ['displayName', 'reviews', 'rating', 'userRatingCount', 'googleMapsURI']
+      }).then(function () { return place; });
+    }).then(function (place) {
+      var reviews = (place.reviews || []).filter(function (review) {
+        return Boolean(review && (review.originalText || review.text));
+      });
+      if (!reviews.length) throw new Error('No Google reviews were returned.');
+
+      var fragment = document.createDocumentFragment();
+      reviews.forEach(function (review) { fragment.appendChild(createGoogleReviewCard(review)); });
+      track.replaceChildren(fragment);
+      track.setAttribute('aria-busy', 'false');
+
+      var summary = document.querySelector('[data-google-review-summary]');
+      if (summary) {
+        summary.hidden = false;
+        var rating = summary.querySelector('[data-google-rating]');
+        var count = summary.querySelector('[data-google-count]');
+        if (rating) rating.textContent = Number(place.rating || 0).toFixed(1);
+        if (count) count.textContent = Number(place.userRatingCount || reviews.length).toLocaleString();
+      }
+
+      var profileUrl = safeExternalUrl(place.googleMapsURI);
+      var profileLink = document.querySelector('[data-google-profile-link]');
+      if (profileLink && profileUrl) profileLink.href = profileUrl;
+
+      var notice = document.querySelector('[data-google-review-notice]');
+      if (notice) {
+        notice.hidden = false;
+        var extraAttributions = notice.querySelector('[data-google-attributions]');
+        if (extraAttributions && place.attributions && place.attributions.length) {
+          extraAttributions.textContent = place.attributions.map(function (item) {
+            return item.provider || String(item);
+          }).filter(function (provider) {
+            return provider && String(provider).toLowerCase() !== 'google maps';
+          }).join(', ');
+        }
+      }
+
+      if (status) status.textContent = 'Showing current reviews supplied by Google Maps.';
+      $(track).trigger('d4w:reviews-updated');
+    }).catch(function () {
+      track.setAttribute('aria-busy', 'false');
+      if (status) status.textContent = 'Live Google reviews are unavailable. Showing locally managed client reviews.';
+    });
+  }
+
+  function initTestimonials() {
+    $('.d4w-testimonials').each(function () {
+      var $region = $(this);
+      var $track = $region.find('.d4w-testimonial-track');
+      var $previous = $region.find('.d4w-testimonial-prev');
+      var $next = $region.find('.d4w-testimonial-next');
+      var $current = $region.find('.d4w-slider-count b');
+      var $total = $region.find('.d4w-slider-count span');
+      var scrollFrame;
+      var index = 0;
+
+      if (!$track.length) return;
+
+      function slides() {
+        return $track.find('.d4w-testimonial-slide');
+      }
+
+      function updateControls() {
+        var $slides = slides();
+        var scrollLeft = $track[0].scrollLeft;
+        var firstOffset = $slides.length ? $slides.get(0).offsetLeft : 0;
+        var closestDistance = Infinity;
+        $slides.each(function (slideIndex) {
+          var distance = Math.abs(this.offsetLeft - firstOffset - scrollLeft);
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            index = slideIndex;
+          }
+        });
+        $slides.removeClass('is-active').eq(index).addClass('is-active');
+        $current.text(String(index + 1).padStart(2, '0'));
+        $total.text(String(Math.max(1, $slides.length)).padStart(2, '0'));
+        $previous.prop('disabled', index <= 0 || $slides.length < 2);
+        $next.prop('disabled', index >= $slides.length - 1 || $slides.length < 2);
+      }
+
+      function goTo(nextIndex) {
+        var $slides = slides();
+        if (!$slides.length) return;
+        index = Math.max(0, Math.min(nextIndex, $slides.length - 1));
+        var target = $slides.get(index);
+        var firstOffset = $slides.get(0).offsetLeft;
+        $track[0].scrollTo({
+          left: target.offsetLeft - firstOffset,
+          behavior: reducedMotion ? 'auto' : 'smooth'
+        });
+        updateControls();
+      }
+
+      $previous.on('click', function () { goTo(index - 1); });
+      $next.on('click', function () { goTo(index + 1); });
+      $track.on('scroll', function () {
+        window.cancelAnimationFrame(scrollFrame);
+        scrollFrame = window.requestAnimationFrame(updateControls);
+      });
+      $track.on('d4w:reviews-updated', function () {
+        index = 0;
+        $track[0].scrollLeft = 0;
+        updateControls();
+      });
+      $window.on('resize', updateControls);
+      updateControls();
+    });
   }
 
   function initContactForm() {
@@ -854,6 +1061,7 @@
     initServicePreview();
     initProjectTilt();
     initTestimonials();
+	initGoogleReviews();
 	initPricingToggle();
     initContactForm();
     updateScrollUI();

@@ -9,11 +9,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'D4W_VERSION', '3.1.1' );
+define( 'D4W_VERSION', '3.2.0' );
 define( 'D4W_DIR', get_template_directory() );
 define( 'D4W_URI', get_template_directory_uri() );
 
 require_once D4W_DIR . '/inc/customizer.php';
+require_once D4W_DIR . '/inc/google-reviews.php';
 require_once D4W_DIR . '/inc/template-functions.php';
 require_once D4W_DIR . '/inc/growth-content.php';
 require_once D4W_DIR . '/inc/dynamic-content.php';
@@ -70,6 +71,7 @@ function d4w_assets() {
 			'nonce'       => wp_create_nonce( 'd4w_contact' ),
 			'successText' => __( 'Thank you! Your message has been sent.', 'design4web' ),
 			'errorText'   => __( 'Something went wrong. Please try again.', 'design4web' ),
+			'googleReviews' => is_front_page() ? d4w_google_reviews_public_config() : array( 'enabled' => false ),
 		)
 	);
 
@@ -585,6 +587,7 @@ function d4w_options_page() {
 					array( 'dashicons-money-alt', 'Pricing plans', 'Edit plan names, pricing modes, features, badges and calls to action.', admin_url( 'edit.php?post_type=d4w_plan' ), 'Manage pricing' ),
 					array( 'dashicons-portfolio', 'Projects', 'Publish portfolio work, categories, client details, dates and project images.', admin_url( 'edit.php?post_type=d4w_project' ), 'Manage projects' ),
 					array( 'dashicons-format-quote', 'Testimonials', 'Control client quotes, roles, ratings and profile images.', admin_url( 'edit.php?post_type=d4w_testimonial' ), 'Manage testimonials' ),
+					array( 'dashicons-google', 'Google reviews', 'Connect the official Places API and show current original Google reviews in responsive cards.', admin_url( 'edit.php?post_type=d4w_testimonial&page=d4w-google-reviews' ), 'Connect Google reviews' ),
 					array( 'dashicons-instagram', 'Social feed', 'Add approved Instagram or social posts with an image, caption and destination URL.', admin_url( 'edit.php?post_type=d4w_social' ), 'Manage social feed' ),
 				array( 'dashicons-editor-ol', 'Process steps', 'Edit the ordered Discover, Design, Build and Grow workflow used across the website.', admin_url( 'edit.php?post_type=d4w_process' ), 'Manage process' ),
 				array( 'dashicons-editor-help', 'FAQs', 'Create and reorder the questions displayed on the contact page.', admin_url( 'edit.php?post_type=d4w_faq' ), 'Manage FAQs' ),

@@ -245,19 +245,25 @@ if ( $case_query->have_posts() ) : ?>
 $testimonial_cover_posts = get_posts( array( 'post_type' => 'd4w_testimonial', 'post_status' => 'publish', 'posts_per_page' => 1, 'orderby' => array( 'menu_order' => 'ASC', 'date' => 'DESC' ), 'no_found_rows' => true ) );
 $testimonial_cover       = $testimonial_cover_posts ? d4w_feature_image_url( $testimonial_cover_posts[0]->ID, 'testimonial.jpg', 'large' ) : $image_dir . 'testimonial.jpg';
 ?>
-<section class="d4w-testimonials section-space">
+<section id="reviews" class="d4w-testimonials section-space" aria-labelledby="d4w-reviews-title">
 	<div class="container-fluid d4w-shell">
 		<div class="row align-items-center g-5">
 			<div class="col-lg-4">
-				<div class="d4w-testimonial-image reveal-up"><img src="<?php echo esc_url( $testimonial_cover ); ?>" alt="<?php esc_attr_e( 'Creative team collaboration', 'design4web' ); ?>" width="542" height="571" loading="lazy"><span><?php esc_html_e( 'Built on trust', 'design4web' ); ?></span></div>
+				<div class="d4w-review-proof reveal-up">
+					<div class="d4w-testimonial-image"><img src="<?php echo esc_url( $testimonial_cover ); ?>" alt="<?php esc_attr_e( 'Creative team collaboration', 'design4web' ); ?>" width="542" height="571" loading="lazy"><span><?php esc_html_e( 'Built on trust', 'design4web' ); ?></span></div>
+					<div class="d4w-google-review-summary" data-google-review-summary hidden>
+						<span class="d4w-google-g" aria-hidden="true">G</span>
+						<div><strong data-google-rating>—</strong><span><span data-google-count>—</span> <?php esc_html_e( 'Google reviews', 'design4web' ); ?></span></div>
+					</div>
+				</div>
 			</div>
 			<div class="col-lg-8">
 				<div class="d-flex justify-content-between align-items-center mb-4">
 					<p class="d4w-section-label reveal-up"><span>Reviews</span><?php esc_html_e( 'Google & client feedback', 'design4web' ); ?></p>
-					<div class="d4w-slider-controls"><button class="d4w-testimonial-prev" aria-label="<?php esc_attr_e( 'Previous testimonial', 'design4web' ); ?>"><i class="bi bi-arrow-left"></i></button><button class="d4w-testimonial-toggle" aria-label="<?php esc_attr_e( 'Pause testimonial autoplay', 'design4web' ); ?>" aria-pressed="false"><i class="bi bi-pause-fill"></i></button><button class="d4w-testimonial-next" aria-label="<?php esc_attr_e( 'Next testimonial', 'design4web' ); ?>"><i class="bi bi-arrow-right"></i></button></div>
+					<div class="d4w-slider-controls" aria-label="<?php esc_attr_e( 'Review carousel controls', 'design4web' ); ?>"><button class="d4w-testimonial-prev" type="button" aria-label="<?php esc_attr_e( 'Previous review', 'design4web' ); ?>"><i class="bi bi-arrow-left"></i></button><span class="d4w-slider-count" aria-live="polite"><b>01</b> / <span>01</span></span><button class="d4w-testimonial-next" type="button" aria-label="<?php esc_attr_e( 'Next review', 'design4web' ); ?>"><i class="bi bi-arrow-right"></i></button></div>
 				</div>
-				<div class="d4w-review-heading reveal-up"><h2><?php echo esc_html( d4w_get_option( 'reviews_title' ) ); ?></h2><?php if ( d4w_get_option( 'google_reviews_url' ) ) : ?><a href="<?php echo esc_url( d4w_get_option( 'google_reviews_url' ) ); ?>" target="_blank" rel="noopener noreferrer"><span class="d4w-google-g">G</span><span><?php esc_html_e( 'Find us on Google', 'design4web' ); ?></span><i class="bi bi-arrow-up-right"></i></a><?php endif; ?></div>
-				<div class="d4w-testimonial-track reveal-up">
+				<div class="d4w-review-heading reveal-up"><h2 id="d4w-reviews-title"><?php echo esc_html( d4w_get_option( 'reviews_title' ) ); ?></h2><?php if ( d4w_get_option( 'google_reviews_url' ) ) : ?><a data-google-profile-link href="<?php echo esc_url( d4w_get_option( 'google_reviews_url' ) ); ?>" target="_blank" rel="noopener noreferrer"><span class="d4w-google-g" aria-hidden="true">G</span><span><?php esc_html_e( 'Find us on Google', 'design4web' ); ?></span><i class="bi bi-arrow-up-right"></i></a><?php endif; ?></div>
+				<div class="d4w-testimonial-track reveal-up" data-google-reviews-track aria-live="polite" aria-busy="false">
 					<?php
 					$testimonial_query = new WP_Query( array( 'post_type' => 'd4w_testimonial', 'posts_per_page' => 10, 'orderby' => array( 'menu_order' => 'ASC', 'date' => 'DESC' ), 'no_found_rows' => true ) );
 					while ( $testimonial_query->have_posts() ) :
@@ -266,13 +272,15 @@ $testimonial_cover       = $testimonial_cover_posts ? d4w_feature_image_url( $te
 						$review_source = get_post_meta( get_the_ID(), '_d4w_review_source', true ) ?: __( 'Client feedback', 'design4web' );
 						$review_url    = get_post_meta( get_the_ID(), '_d4w_review_url', true );
 						?>
-						<article class="d4w-testimonial-slide">
-							<div class="d4w-stars"><?php for ( $star = 0; $star < $rating; $star++ ) : ?><i class="bi bi-star-fill"></i><?php endfor; ?></div>
+						<article class="d4w-testimonial-slide d4w-review-card">
+							<div class="d4w-review-card__top"><div class="d4w-stars" aria-label="<?php echo esc_attr( sprintf( __( '%d out of 5 stars', 'design4web' ), $rating ) ); ?>"><?php for ( $star = 0; $star < 5; $star++ ) : ?><i class="bi <?php echo $star < $rating ? 'bi-star-fill' : 'bi-star'; ?>"></i><?php endfor; ?></div><i class="bi bi-quote" aria-hidden="true"></i></div>
 							<blockquote>“<?php echo esc_html( wp_strip_all_tags( get_the_content() ) ); ?>”</blockquote>
 							<div class="d4w-testimonial-author"><?php if ( has_post_thumbnail() ) : the_post_thumbnail( 'thumbnail', array( 'loading' => 'lazy' ) ); else : ?><span class="d4w-testimonial-avatar" aria-hidden="true"><?php echo esc_html( strtoupper( substr( get_the_title(), 0, 1 ) ) ); ?></span><?php endif; ?><div><strong><?php the_title(); ?></strong><span><?php echo esc_html( get_post_meta( get_the_ID(), '_d4w_role', true ) ); ?></span><?php if ( $review_url ) : ?><a href="<?php echo esc_url( $review_url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $review_source ); ?><i class="bi bi-arrow-up-right"></i></a><?php else : ?><small><?php echo esc_html( $review_source ); ?></small><?php endif; ?></div></div>
 						</article>
 					<?php endwhile; wp_reset_postdata(); ?>
 				</div>
+				<p class="d4w-google-review-notice" data-google-review-notice hidden><span translate="no">Google Maps</span> <?php esc_html_e( 'reviews are displayed in Google’s relevance order. Reviews are not verified by Google, but Google checks for and removes fake content when identified.', 'design4web' ); ?> <a href="https://support.google.com/contributionpolicy/answer/7400114" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Review policy', 'design4web' ); ?></a><span data-google-attributions></span></p>
+				<p class="screen-reader-text" data-google-review-status aria-live="polite"></p>
 			</div>
 		</div>
 	</div>

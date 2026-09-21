@@ -1,10 +1,10 @@
 # Design4Web Studio
 
-A custom, multipage, motion-first WordPress theme built for Design4web. Version 3.1.1 keeps the animated hero gradient headline stable in Chromium, alongside the responsive editorial Work archive, progressive project loading and redesigned animated footer.
+A custom, multipage, motion-first WordPress theme built for Design4web. Version 3.2 adds responsive full-text review cards and an optional live Google Maps review connection, alongside the motion-rich agency experience.
 
 ## Install or update
 
-The ready-to-upload release is `design4web-studio-3.1.1.zip`.
+The ready-to-upload release is `design4web-studio-3.2.0.zip`.
 
 1. Download the ZIP without extracting it.
 2. Open **WordPress Admin → Appearance → Themes → Add New → Upload Theme**.
@@ -22,7 +22,8 @@ The theme safely creates Home, About, Services, Products, Work, Pricing, Journal
 - **Products** — title, copy, icon, kicker, benefits, workflow, accent, disclaimer and display order.
 - **Pricing Plans** — monthly/project labels, supporting notes, badge, feature list, CTA and featured state.
 - **Projects** — case-study copy, project types, client, period, industry, services, challenge, outcome, results, optional URL, image and display order.
-- **Testimonials** — quote, client, company/role, rating, source, original-review URL, photo and order.
+- **Testimonials** — quote, client, company/role, rating, source, original-review URL, photo and order; these remain the fallback when Google is not configured or unavailable.
+- **Testimonials → Google Reviews** — connect a Google Maps browser API key and Business Place ID to show current original Google reviews.
 - **Social Feed** — Instagram/social URL, platform, handle, caption, thumbnail and order.
 - **Process Steps** — title, description, number, icon and order.
 - **FAQs** — question, answer, category and order.
@@ -61,7 +62,11 @@ Touch devices receive a lighter motion profile. `prefers-reduced-motion`, keyboa
 
 ## Reviews, social feed and maps
 
-- Review cards are managed in **Testimonials**. Set the source and original URL for each genuine review; the theme does not scrape or invent Google reviews.
+- Review cards use a responsive horizontal rail, grow with the complete quote and never crop long review text.
+- Locally managed cards are available in **Testimonials**. Set the source and original URL for every genuine review.
+- Optional live reviews are configured under **Testimonials → Google Reviews**. The browser uses the official Places library and keeps the local cards as a fallback; the theme does not scrape or store Google review content.
+- Google currently returns up to five reviews ordered by relevance. Live cards include the available author attribution, rating, relative date, original Google Maps review link and required Google Maps notice.
+- In Google Cloud, enable billing, **Maps JavaScript API** and **Places API (New)**. Restrict the browser key to the live/staging HTTP referrers and to those APIs before saving it in WordPress.
 - Social cards are managed in **Social Feed**. Upload the thumbnail and add the original Instagram/social URL; this avoids brittle unauthenticated scraping.
 - The contact map works from the saved office address without a browser API key. A custom Google Maps embed URL can be supplied in the Customizer when required.
 
