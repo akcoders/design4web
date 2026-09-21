@@ -1,10 +1,10 @@
 # Design4Web Studio
 
-A custom, multipage, motion-first WordPress theme built for Design4web. Version 3.1 adds a responsive editorial Work archive, progressive project loading and a completely redesigned animated footer.
+A custom, multipage, motion-first WordPress theme built for Design4web. Version 3.1.1 keeps the animated hero gradient headline stable in Chromium, alongside the responsive editorial Work archive, progressive project loading and redesigned animated footer.
 
 ## Install or update
 
-The ready-to-upload release is `design4web-studio-3.1.0.zip`.
+The ready-to-upload release is `design4web-studio-3.1.1.zip`.
 
 1. Download the ZIP without extracting it.
 2. Open **WordPress Admin → Appearance → Themes → Add New → Upload Theme**.

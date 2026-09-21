@@ -183,9 +183,11 @@
 
   function initWordReveals() {
     if (!motionEnabled) return;
+    // Hero lines have their own slide reveal. Keeping their text intact also
+    // prevents Chromium from losing an ancestor background-clipped gradient
+    // when the temporary word layers are cleaned up after the intro.
     var selectors = [
       '.reveal-text',
-      '.d4w-hero__title .line-inner',
       '.d4w-page-title',
       '.d4w-service-item h3 a',
       '.d4w-service-expander__heading strong',
