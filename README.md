@@ -1,10 +1,10 @@
 # Design4Web Studio
 
-A custom, multipage, motion-first WordPress theme built for Design4web. Version 3.0 adds a dynamic WhatsApp product suite, editable pricing routes, richer service coverage, case-study/review/social sections and a rebuilt Work experience.
+A custom, multipage, motion-first WordPress theme built for Design4web. Version 3.1 adds a responsive editorial Work archive, progressive project loading and a completely redesigned animated footer.
 
 ## Install or update
 
-The ready-to-upload release is `design4web-studio-3.0.0.zip`.
+The ready-to-upload release is `design4web-studio-3.1.0.zip`.
 
 1. Download the ZIP without extracting it.
 2. Open **WordPress Admin → Appearance → Themes → Add New → Upload Theme**.
@@ -39,14 +39,14 @@ Global colors, section copy, statistics, Google review/profile URL, map embed UR
 - Services archive and dynamic service detail pages
 - Products archive and six dynamic product detail pages
 - Creative pricing page with an editable plan-mode toggle
-- Filterable Work archive and dynamic case studies
+- Responsive editorial Work archive with dynamic filters, progressive loading and case studies
 - Journal archive and article pages
 - Contact and FAQ page
 - Standard page, archive, search/404 and comment templates
 
 ## Motion system
 
-The original motion layer includes a preloader, page transitions, split-word reveals, staggered card entrances, image curtains, product orbits/pulses/tickers, expandable service rows, project filtering, parallax, counters, pointer spotlights, magnetic/ripple buttons, custom cursor, testimonial controls and rich hover/focus states.
+The original motion layer includes a preloader, page transitions, split-word reveals, staggered card entrances, image curtains, product orbits/pulses/tickers, an animated footer marquee, expandable service rows, project filtering, parallax, counters, pointer spotlights, magnetic/ripple buttons, custom cursor, testimonial controls and rich hover/focus states.
 
 Under **Brand & Motion**, administrators can independently control:
 

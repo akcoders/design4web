@@ -22,13 +22,21 @@ $term_count    = is_wp_error( $project_terms ) ? 0 : count( $project_terms );
 
 <section class="d4w-work-archive section-space-sm">
 	<div class="container-fluid d4w-shell">
+		<div class="d4w-work-intro">
+			<div>
+				<p class="d4w-section-label reveal-up"><span><?php esc_html_e( 'Archive', 'design4web' ); ?></span><?php esc_html_e( 'Explore by capability', 'design4web' ); ?></p>
+				<h2 class="d4w-display reveal-text"><?php esc_html_e( 'Selected launches, identities and digital experiences.', 'design4web' ); ?></h2>
+			</div>
+			<p class="d4w-work-intro__note reveal-up"><?php esc_html_e( 'Every project starts with a different problem. Filter the archive, open a case study and see how strategy, design and technology came together.', 'design4web' ); ?></p>
+		</div>
+
 		<?php if ( $is_term ) : ?>
 			<div class="d4w-project-filters reveal-up" aria-label="<?php esc_attr_e( 'Project archive navigation', 'design4web' ); ?>"><a href="<?php echo esc_url( get_post_type_archive_link( 'd4w_project' ) ); ?>"><?php esc_html_e( 'All work', 'design4web' ); ?></a><span class="is-active"><?php single_term_title(); ?></span></div>
 		<?php elseif ( ! is_wp_error( $project_terms ) && $project_terms ) : ?>
 			<div class="d4w-project-filters reveal-up" role="group" aria-label="<?php esc_attr_e( 'Filter projects', 'design4web' ); ?>"><button class="is-active" type="button" data-project-filter="*" aria-pressed="true"><?php esc_html_e( 'All work', 'design4web' ); ?><span><?php echo esc_html( $published ); ?></span></button><?php foreach ( $project_terms as $term ) : ?><button type="button" data-project-filter="<?php echo esc_attr( $term->slug ); ?>" aria-pressed="false"><?php echo esc_html( $term->name ); ?><span><?php echo esc_html( $term->count ); ?></span></button><?php endforeach; ?></div>
 		<?php endif; ?>
 
-		<div class="row g-4 d4w-filter-grid" aria-live="polite">
+		<div class="d4w-work-gallery d4w-filter-grid" aria-live="polite">
 			<?php
 			$project_index = 0;
 			if ( have_posts() ) :
@@ -42,11 +50,24 @@ $term_count    = is_wp_error( $project_terms ) ? 0 : count( $project_terms );
 					$year       = get_post_meta( get_the_ID(), '_d4w_year', true ) ?: get_the_date( 'Y' );
 					$services   = get_post_meta( get_the_ID(), '_d4w_services', true );
 					$featured   = 1 === $project_index;
+					$layout     = $featured ? 'd4w-work-tile--lead' : ( 0 === $project_index % 4 ? 'd4w-work-tile--portrait' : '' );
 					?>
-					<div class="<?php echo $featured ? 'col-12' : 'col-md-6 col-xl-4'; ?> d4w-filter-item" data-project-types="<?php echo esc_attr( implode( ' ', $term_slugs ) ); ?>">
-						<article class="d4w-work-card reveal-up <?php echo $featured ? 'd4w-work-card--featured' : ''; ?>">
-							<a class="d4w-work-card__media d4w-image-curtain" href="<?php the_permalink(); ?>" data-cursor-label="VIEW"><img src="<?php echo esc_url( $image ); ?>" alt="<?php echo esc_attr( get_the_title() ); ?>" width="1200" height="900" loading="lazy"><span class="d4w-work-card__index"><?php echo esc_html( str_pad( (string) $project_index, 2, '0', STR_PAD_LEFT ) ); ?></span><span class="d4w-work-card__open"><i class="bi bi-arrow-up-right"></i></span></a>
-							<div class="d4w-work-card__copy"><div><p><?php echo esc_html( implode( ' · ', $term_names ) ); ?></p><h2><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h2><?php if ( $featured ) : ?><div><?php echo esc_html( d4w_card_excerpt( get_the_ID(), 30 ) ); ?></div><?php endif; ?></div><aside><strong><?php echo esc_html( $year ); ?></strong><?php if ( $services ) : ?><small><?php echo esc_html( $services ); ?></small><?php endif; ?></aside></div>
+					<div class="d4w-filter-item d4w-work-tile <?php echo esc_attr( $layout ); ?>" data-project-types="<?php echo esc_attr( implode( ' ', $term_slugs ) ); ?>">
+						<article class="d4w-work-card d4w-hover-surface reveal-up <?php echo $featured ? 'd4w-work-card--featured' : ''; ?>">
+							<a class="d4w-work-card__media d4w-image-curtain" href="<?php the_permalink(); ?>" data-cursor-label="VIEW">
+								<img src="<?php echo esc_url( $image ); ?>" alt="<?php echo esc_attr( get_the_title() ); ?>" width="1200" height="900" loading="lazy">
+								<span class="d4w-work-card__index"><?php echo esc_html( str_pad( (string) $project_index, 2, '0', STR_PAD_LEFT ) ); ?></span>
+								<span class="d4w-work-card__open"><i class="bi bi-arrow-up-right"></i></span>
+							</a>
+							<div class="d4w-work-card__copy">
+								<span class="d4w-work-card__ghost" aria-hidden="true"><?php echo esc_html( str_pad( (string) $project_index, 2, '0', STR_PAD_LEFT ) ); ?></span>
+								<div class="d4w-work-card__main">
+									<p><?php echo esc_html( implode( ' · ', $term_names ) ); ?></p>
+									<h2><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h2>
+									<?php if ( $featured ) : ?><div><?php echo esc_html( d4w_card_excerpt( get_the_ID(), 30 ) ); ?></div><?php endif; ?>
+								</div>
+								<aside><strong><?php echo esc_html( $year ); ?></strong><?php if ( $services ) : ?><small><?php echo esc_html( $services ); ?></small><?php endif; ?><a href="<?php the_permalink(); ?>"><?php esc_html_e( 'View case', 'design4web' ); ?><i class="bi bi-arrow-up-right"></i></a></aside>
+							</div>
 						</article>
 					</div>
 				<?php endwhile; ?>
@@ -54,6 +75,9 @@ $term_count    = is_wp_error( $project_terms ) ? 0 : count( $project_terms );
 				<div class="col-12 d4w-empty-state"><h2><?php esc_html_e( 'New work is coming soon.', 'design4web' ); ?></h2><p><?php esc_html_e( 'Start a conversation about what we can create together.', 'design4web' ); ?></p></div>
 			<?php endif; ?>
 		</div>
+		<?php if ( $published > 9 && ! $is_term ) : ?>
+			<div class="d4w-work-more reveal-up"><button type="button" data-work-load-more><span><?php esc_html_e( 'Load more projects', 'design4web' ); ?></span><small aria-live="polite"></small><i class="bi bi-plus-lg"></i></button></div>
+		<?php endif; ?>
 	</div>
 </section>
 

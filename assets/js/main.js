@@ -195,8 +195,9 @@
       '.d4w-related-card h3',
 	  '.d4w-product-card h2',
 	  '.d4w-home-product h3',
-	  '.d4w-home-case h3',
+      '.d4w-home-case h3',
 	  '.d4w-work-card h2 a',
+	  '.d4w-footer-cta h2',
 	  '.d4w-price-card h2',
 	  '.d4w-product-benefit h3',
 	  '.d4w-product-step h3',
@@ -255,7 +256,7 @@
       { selector: '.d4w-journal-card', variant: 'motion-scale' },
       { selector: '.d4w-related-card, .d4w-value-card, .d4w-contact-info-card, .d4w-team-card', variant: 'motion-scale' },
       { selector: '.d4w-faq-item, .d4w-timeline__item, .d4w-case-block, .d4w-case-metric', variant: 'motion-up' },
-      { selector: '.site-footer .row > div', variant: 'motion-up' },
+	  { selector: '.d4w-footer-cta, .d4w-footer-grid > div', variant: 'motion-up' },
       { selector: '.footer-bottom', variant: 'motion-up' }
     ];
 
@@ -285,7 +286,7 @@
 
   function initSpotlights() {
     if (!motionEnabled || window.matchMedia('(pointer: coarse)').matches) return;
-    var selector = '.d4w-service-item, .d4w-process-step, .d4w-post-card, .d4w-stats > div, .d4w-contact-form, .d4w-related-card, .d4w-value-card, .d4w-contact-info-card, .d4w-journal-card, .d4w-case-metric, .d4w-team-card, .d4w-product-card, .d4w-home-product, .d4w-price-card, .d4w-product-benefit, .d4w-product-step';
+    var selector = '.d4w-service-item, .d4w-process-step, .d4w-post-card, .d4w-stats > div, .d4w-contact-form, .d4w-related-card, .d4w-value-card, .d4w-contact-info-card, .d4w-journal-card, .d4w-case-metric, .d4w-team-card, .d4w-product-card, .d4w-home-product, .d4w-price-card, .d4w-product-benefit, .d4w-product-step, .d4w-work-card';
 
     $(selector).each(function () {
       if (!$(this).children('.d4w-card-glow').length) {
@@ -395,18 +396,55 @@
   function initProjectFilters() {
     var $buttons = $('[data-project-filter]');
     var $items = $('.d4w-filter-item');
-    if (!$buttons.length || !$items.length) return;
+    var $loadMore = $('[data-work-load-more]');
+    if (!$items.length) return;
+
+    var pageSize = window.matchMedia('(max-width: 767.98px)').matches ? 6 : 8;
+    var visibleLimit = $loadMore.length ? pageSize : Number.POSITIVE_INFINITY;
+    var activeFilter = '*';
+
+    function renderProjects() {
+      var matched = 0;
+      var shown = 0;
+
+      $items.each(function () {
+        var $item = $(this);
+        var types = String($item.data('project-types') || '').split(/\s+/);
+        var matches = activeFilter === '*' || types.indexOf(activeFilter) !== -1;
+        var withinLimit = matches && shown < visibleLimit;
+        if (matches) {
+          matched += 1;
+          if (withinLimit) shown += 1;
+        }
+        $item.toggleClass('is-filtered-out', !matches);
+        $item.toggleClass('is-load-hidden', matches && !withinLimit);
+        $item.attr('aria-hidden', withinLimit ? 'false' : 'true');
+      });
+
+      if ($loadMore.length) {
+        var remaining = Math.max(matched - shown, 0);
+        $loadMore.toggleClass('is-complete', remaining === 0).prop('disabled', remaining === 0);
+		$loadMore.closest('.d4w-work-more').toggleClass('is-complete', remaining === 0);
+        $loadMore.find('small').text(remaining ? '+' + Math.min(pageSize, remaining) : 'All projects visible');
+      }
+    }
 
     $buttons.on('click', function () {
-      var filter = $(this).data('project-filter');
+	  activeFilter = $(this).data('project-filter');
+	  visibleLimit = $loadMore.length ? pageSize : Number.POSITIVE_INFINITY;
       $buttons.removeClass('is-active').attr('aria-pressed', 'false');
       $(this).addClass('is-active').attr('aria-pressed', 'true');
-      $items.each(function () {
-        var types = String($(this).data('project-types') || '').split(/\s+/);
-        var visible = filter === '*' || types.indexOf(filter) !== -1;
-        $(this).toggleClass('is-filtered-out', !visible).attr('aria-hidden', visible ? 'false' : 'true');
-      });
+	  renderProjects();
     });
+
+	$loadMore.on('click', function () {
+	  visibleLimit += pageSize;
+	  renderProjects();
+	  var $firstNew = $items.filter(':not(.is-filtered-out):not(.is-load-hidden)').eq(Math.max(visibleLimit - pageSize, 0));
+	  if ($firstNew.length) $firstNew.find('a').first().trigger('focus');
+	});
+
+	renderProjects();
   }
 
   function initHoverCards() {
