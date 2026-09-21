@@ -1,10 +1,10 @@
 # Design4Web Studio
 
-A custom, multipage, motion-first WordPress theme built for Design4web. Version 3.2 adds responsive full-text review cards and an optional live Google Maps review connection, alongside the motion-rich agency experience.
+A custom, multipage, motion-first WordPress theme built for Design4web. Version 3.2.1 adds a logo-led, colour-harmonized header and footer while retaining the responsive full-text review cards, optional live Google Maps review connection and motion-rich agency experience.
 
 ## Install or update
 
-The ready-to-upload release is `design4web-studio-3.2.0.zip`.
+The ready-to-upload release is `design4web-studio-3.2.1.zip`.
 
 1. Download the ZIP without extracting it.
 2. Open **WordPress Admin → Appearance → Themes → Add New → Upload Theme**.
@@ -47,7 +47,7 @@ Global colors, section copy, statistics, Google review/profile URL, map embed UR
 
 ## Motion system
 
-The original motion layer includes a preloader, page transitions, split-word reveals, staggered card entrances, image curtains, product orbits/pulses/tickers, an animated footer marquee, expandable service rows, project filtering, parallax, counters, pointer spotlights, magnetic/ripple buttons, custom cursor, testimonial controls and rich hover/focus states.
+The original motion layer includes a preloader, page transitions, split-word reveals, staggered card entrances, image curtains, product orbits/pulses/tickers, an animated footer marquee, expandable service rows, project filtering, parallax, counters, pointer spotlights, magnetic/ripple buttons, custom cursor, testimonial controls and rich hover/focus states. The header and footer use the logo's lime/green family over a charcoal base, with matching navigation indicators, glass effects, CTA shines and ambient footer rings; the uploaded logo artwork itself is not recoloured.
 
 Under **Brand & Motion**, administrators can independently control:
 
