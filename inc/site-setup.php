@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'D4W_SCHEMA_VERSION', '2.0.0' );
+define( 'D4W_SCHEMA_VERSION', '3.0.0' );
 
 /**
  * Find seeded content without relying on WP_Query's title handling. Titles
@@ -76,14 +76,14 @@ function d4w_ensure_page( $title, $slug, $content = '' ) {
  */
 function d4w_upgrade_services() {
 	$services = array(
-		'Web Design' => array(
+		'Website Design' => array(
 			'excerpt'      => 'Distinctive, responsive websites that turn your business goals into a clear and memorable digital experience.',
 			'content'      => '<p>Great web design combines visual personality with logical navigation and effortless usability. We begin with your audience and business goals, then build a responsive interface that makes every interaction feel intentional.</p><h2>Designed around your identity</h2><p>From typography and colour to page hierarchy and conversion paths, every element supports a consistent brand. The result is a website that feels unmistakably yours on desktop, tablet and mobile.</p><h2>Creative work with a practical purpose</h2><p>We design company websites, landing pages, campaign experiences, UI systems, brand identities and supporting digital graphics. Each direction is refined with you before development begins.</p>',
 			'deliverables' => "UX and content structure\nResponsive interface design\nCustom visual direction\nConversion-focused page layouts\nDesign system and handoff",
 			'icon'         => 'bi-bezier2',
 			'label'        => 'Design & UX',
 		),
-		'Brand & Creative' => array(
+		'Logo & Brand Design' => array(
 			'excerpt'      => 'Distinctive identity and campaign systems that keep every customer-facing touchpoint recognisable and consistent.',
 			'content'      => '<p>A strong brand gives every digital experience a clear point of view. We create visual systems that can move confidently between websites, social channels, presentations, campaigns and physical collateral.</p><h2>One idea, expressed consistently</h2><p>Capabilities include logo and identity design, UI direction, campaign graphics, landing pages, digital banners, brochures, packaging, exhibition material and supporting photography or motion direction. Each asset belongs to one practical, reusable system.</p><h2>Creative work made for real use</h2><p>Files, guidelines and adaptable templates are prepared around the people who will use them, helping your team stay consistent after delivery.</p>',
 			'deliverables' => "Logo and visual identity\nBrand color and typography system\nCampaign and social creative\nDigital and print collateral\nPractical usage guidelines",
@@ -111,12 +111,19 @@ function d4w_upgrade_services() {
 			'icon'         => 'bi-bag-check',
 			'label'        => 'Online stores',
 		),
-		'Domain & Hosting' => array(
+		'Domain & Web Hosting' => array(
 			'excerpt'      => 'Domain, email and hosting infrastructure managed with responsive support and dependable monitoring.',
 			'content'      => '<p>Your domain is the foundation of your online identity. We help select, register, configure and transfer domains, then connect them to reliable hosting and business email.</p><h2>One accountable technical partner</h2><p>Hosting is matched to the actual needs of the website, with SSL, backups, uptime monitoring and support included where required. If you are moving an existing site, we plan the migration to minimise disruption.</p>',
 			'deliverables' => "Domain registration and transfer\nWebsite and email hosting\nSSL and DNS configuration\nMigration assistance\nMonitoring and support",
 			'icon'         => 'bi-cloud-check',
 			'label'        => 'Infrastructure',
+		),
+		'Google Workspace' => array(
+			'excerpt'      => 'Professional Gmail, shared calendars, cloud files and collaboration tools configured around your team.',
+			'content'      => '<p>Google Workspace brings business email, calendars, meetings, files and collaboration into one secure environment. We help you choose the right plan, connect your domain and organise the account so your team can begin with confidence.</p><h2>Business communication without the setup friction</h2><p>Our support can cover DNS verification, user accounts, aliases, groups, shared drives, email migration and mobile configuration. We also help establish sensible access and security practices for day-to-day administration.</p>',
+			'deliverables' => "Plan and licence guidance\nDomain and DNS verification\nBusiness email setup\nUser, alias and group configuration\nMigration and team onboarding",
+			'icon'         => 'bi-google',
+			'label'        => 'Email & collaboration',
 		),
 		'SEO & Marketing' => array(
 			'excerpt'      => 'Search strategy, technical optimisation and content foundations designed to create sustainable visibility.',
@@ -132,6 +139,13 @@ function d4w_upgrade_services() {
 			'icon'         => 'bi-megaphone',
 			'label'        => 'Social campaigns',
 		),
+		'Google Ads & Performance Marketing' => array(
+			'excerpt'      => 'Search and performance campaigns planned around qualified leads, useful landing pages and measurable action.',
+			'content'      => '<p>Paid media performs best when campaign intent, creative, landing pages and tracking are designed together. We structure Google Search and performance campaigns around the actions that matter to your business.</p><h2>Spend with a clear feedback loop</h2><p>Keyword planning, campaign structure, conversion tracking, landing-page recommendations and ongoing optimisation are connected in one measurable workflow. Reporting focuses on lead quality and commercial value rather than reach alone.</p>',
+			'deliverables' => "Campaign and keyword strategy\nGoogle Ads account structure\nConversion tracking setup\nLanding-page recommendations\nOptimisation and reporting",
+			'icon'         => 'bi-bullseye',
+			'label'        => 'Paid acquisition',
+		),
 		'Website Care' => array(
 			'excerpt'      => 'Ongoing updates, backups, security and improvements that keep your website useful after launch.',
 			'content'      => '<p>A live website needs regular attention: software changes, content updates, backups, security checks and performance reviews. Our care service gives you a dependable technical partner without the overhead of an in-house web team.</p><h2>Keep the experience current</h2><p>We can handle routine content changes, image replacement, new pages, functionality updates, security hardening and structural improvements. Support is planned around your site and business priorities.</p>',
@@ -141,9 +155,18 @@ function d4w_upgrade_services() {
 		),
 	);
 
+	$aliases = array(
+		'Website Design'      => 'Web Design',
+		'Logo & Brand Design' => 'Brand & Creative',
+		'Domain & Web Hosting'=> 'Domain & Hosting',
+	);
+
 	foreach ( $services as $index => $service ) {
 		$service_order = array_search( $index, array_keys( $services ), true );
 		$post = d4w_find_seeded_post( $index, 'd4w_service' );
+		if ( ! $post && isset( $aliases[ $index ] ) ) {
+			$post = d4w_find_seeded_post( $aliases[ $index ], 'd4w_service' );
+		}
 		if ( ! $post ) {
 			$post_id = wp_insert_post(
 				array(
@@ -158,6 +181,10 @@ function d4w_upgrade_services() {
 		} else {
 			$post_id = $post->ID;
 			$update  = array( 'ID' => $post_id, 'menu_order' => $service_order );
+			if ( isset( $aliases[ $index ] ) && 0 === strcasecmp( wp_specialchars_decode( $post->post_title, ENT_QUOTES ), $aliases[ $index ] ) ) {
+				$update['post_title'] = $index;
+				$update['post_name']  = sanitize_title( $index );
+			}
 			if ( ! trim( $post->post_content ) ) {
 				$update['post_content'] = $service['content'];
 			}
@@ -272,6 +299,9 @@ function d4w_upgrade_projects() {
 				update_post_meta( $post_id, $key, $value );
 			}
 		}
+		if ( $order < 3 && ! metadata_exists( 'post', $post_id, '_d4w_featured_case_study' ) ) {
+			update_post_meta( $post_id, '_d4w_featured_case_study', '1' );
+		}
 		wp_set_object_terms( $post_id, $project[6], 'd4w_project_type', true );
 	}
 
@@ -291,6 +321,187 @@ function d4w_upgrade_projects() {
 		update_post_meta( $post->ID, '_d4w_services', $concept[3] );
 		update_post_meta( $post->ID, '_d4w_challenge', 'Turn a broad business goal into a focused digital direction with a clear visual point of view.' );
 		update_post_meta( $post->ID, '_d4w_outcome', $concept[4] );
+	}
+}
+
+/**
+ * Create the editable WhatsApp product catalogue shown in the supplied menu
+ * reference. Copy is original to Design4web and does not imply a Meta or
+ * third-party platform partnership.
+ */
+function d4w_upgrade_products() {
+	$products = array(
+		'whatsapp-business-api' => array(
+			'title'    => 'WhatsApp Business API',
+			'excerpt'  => 'Plan, onboard and connect an official business messaging setup built for campaigns, notifications and multi-agent support.',
+			'content'  => '<p>Move beyond a single-device inbox and create a structured WhatsApp communication system for your business. Design4web helps assess readiness, coordinate platform onboarding and shape the website, campaign and integration work around the official WhatsApp Business Platform.</p><h2>One foundation for marketing and service</h2><p>Bring approved message templates, team access, lead capture and essential customer journeys into a practical launch plan. We keep responsibilities, third-party costs and approval requirements clear from the beginning.</p>',
+			'kicker'   => 'Business messaging foundation',
+			'icon'     => 'bi-briefcase-fill',
+			'accent'   => '#19b86a',
+			'features' => "Readiness and eligibility review\nBusiness account onboarding guidance\nTemplate and journey planning\nMulti-agent inbox setup support\nCRM, website and webhook planning\nLaunch testing and team handover",
+			'steps'    => "Assess | Review the business account, phone number, use cases and required integrations.\nConfigure | Coordinate provider onboarding, access, templates and team structure.\nConnect | Link forms, landing pages, campaigns or business tools where required.\nLaunch | Test the journeys, train the team and define the next optimisation cycle.",
+			'note'     => 'WhatsApp/Meta approval, message charges and any third-party platform subscription are separate and remain subject to the provider’s current policies.',
+		),
+		'whatsapp-marketing' => array(
+			'title'    => 'WhatsApp Marketing',
+			'excerpt'  => 'Permission-led broadcasts, campaign journeys and conversion tracking designed to turn customer attention into useful action.',
+			'content'  => '<p>WhatsApp marketing works when the message is timely, relevant and easy to act on. We shape an opt-in journey, audience structure, message templates and landing experience that support campaigns without losing the human quality of the channel.</p><h2>Campaigns connected to the customer journey</h2><p>Launch product updates, offers, reminders and follow-ups with clear calls to action. Audience segments, scheduling and performance reviews help your team learn what creates replies, leads and sales.</p>',
+			'kicker'   => 'Broadcast, engage and grow',
+			'icon'     => 'bi-broadcast-pin',
+			'accent'   => '#6b5cff',
+			'features' => "Opt-in and audience strategy\nCampaign message planning\nApproved template support\nBroadcast scheduling workflow\nLanding page and CTA integration\nPerformance and conversion review",
+			'steps'    => "Plan | Define the audience, goal, consent path and campaign offer.\nCreate | Build the message sequence, creative assets and destination experience.\nActivate | Configure segments, templates, timing and campaign tracking.\nImprove | Review delivery, clicks, replies and qualified outcomes.",
+			'note'     => 'Campaigns must follow WhatsApp consent, template and messaging-quality rules. Platform and message charges are billed separately by the selected provider.',
+		),
+		'whatsapp-chatbots' => array(
+			'title'    => 'WhatsApp Chatbots',
+			'excerpt'  => 'No-code conversation flows that answer common questions, qualify leads and route customers to the right next step.',
+			'content'  => '<p>Create dependable, rule-based chat journeys without turning every request into a manual task. We map customer intent, structure the flow and connect helpful replies, menus, forms and hand-off points into an experience your team can maintain.</p><h2>Automation with a clear escape route</h2><p>Chatbots can guide product discovery, capture enquiries, share information and resolve frequent questions. Human hand-off remains visible so customers are never trapped inside an automation loop.</p>',
+			'kicker'   => 'No-code flow automation',
+			'icon'     => 'bi-diagram-3-fill',
+			'accent'   => '#ff7a45',
+			'features' => "Conversation and intent mapping\nDrag-and-drop flow configuration\nLead qualification questions\nFAQ and product guidance\nHuman-agent hand-off\nTesting and optimisation",
+			'steps'    => "Map | Identify common questions, decision points and the right human hand-offs.\nWrite | Create concise prompts, replies and error-recovery paths.\nBuild | Configure and connect the approved conversation flow.\nTest | Check every branch on real devices before launch.",
+			'note'     => 'Flow-builder access and message usage depend on the selected WhatsApp platform plan.',
+		),
+		'ai-whatsapp-chatbot' => array(
+			'title'    => 'AI WhatsApp Chatbot',
+			'excerpt'  => 'A knowledge-led AI assistant that can understand natural questions, respond around the clock and escalate with context.',
+			'content'  => '<p>An AI assistant can answer varied customer questions without forcing people through a rigid menu. We organise the approved knowledge, define guardrails and connect the assistant to the customer journey so replies remain useful and on-brand.</p><h2>Human-like speed with human oversight</h2><p>The experience can support multiple languages, product questions, lead qualification and routine service requests. Clear fallback and escalation rules keep complex or sensitive conversations with the right team member.</p>',
+			'kicker'   => 'AI-assisted customer experience',
+			'icon'     => 'bi-robot',
+			'accent'   => '#ff3eb5',
+			'features' => "Knowledge-base preparation\nNatural-language response design\nBrand tone and guardrails\nMultilingual journey planning\nCRM or API integration planning\nHuman escalation with context",
+			'steps'    => "Scope | Choose the questions and outcomes suitable for AI assistance.\nPrepare | Organise approved content, policies, products and tone guidance.\nTrain | Configure knowledge, guardrails, tools and escalation behaviour.\nOptimise | Review unresolved questions and improve the knowledge continuously.",
+			'note'     => 'AI responses require review, maintained source content and appropriate human oversight. AI-message and platform usage costs are separate.',
+		),
+		'whatsapp-link-qr' => array(
+			'title'    => 'WhatsApp Link & QR',
+			'excerpt'  => 'Click-to-chat links and trackable QR journeys that move people from websites, print and physical spaces into a conversation.',
+			'content'  => '<p>Make it effortless for a customer to begin the right WhatsApp conversation. We create click-to-chat destinations, pre-filled messages and QR touchpoints that can be used across landing pages, campaigns, packaging, signage and events.</p><h2>A small interaction with measurable intent</h2><p>Different links can support different campaigns or locations, helping teams understand where conversations begin. Every destination is checked on desktop and mobile and presented with a clear reason to engage.</p>',
+			'kicker'   => 'Click, scan and start talking',
+			'icon'     => 'bi-link-45deg',
+			'accent'   => '#0da9a0',
+			'features' => "Click-to-chat link setup\nPre-filled message planning\nBranded QR artwork\nWebsite WhatsApp button\nCampaign-specific destinations\nTracking and placement guidance",
+			'steps'    => "Define | Choose the number, message intent and customer entry points.\nCreate | Build the link, pre-filled message and branded QR treatment.\nPlace | Add the journey to web, social, print or physical touchpoints.\nMeasure | Compare scans, clicks and qualified conversations by campaign.",
+			'note'     => 'QR and link performance depends on placement, consent and the availability of the connected WhatsApp number.',
+		),
+		'whatsapp-blue-tick' => array(
+			'title'    => 'WhatsApp Blue Tick',
+			'excerpt'  => 'Application-readiness support for businesses seeking an official WhatsApp verified badge and a more trusted presence.',
+			'content'  => '<p>A verified badge helps customers recognise that they are speaking with an authentic business account. Design4web can review the digital footprint and account readiness, organise required information and guide the application workflow.</p><h2>Build credibility before applying</h2><p>Verification depends on factors such as business verification, an approved display name, messaging quality, public notability and Meta’s assessment. We focus on the controllable parts and communicate the decision boundary clearly.</p>',
+			'kicker'   => 'Verification readiness',
+			'icon'     => 'bi-patch-check-fill',
+			'accent'   => '#1887f2',
+			'features' => "Account-readiness checklist\nBusiness and display-name review\nDigital presence audit\nApplication information support\nMessaging-quality guidance\nStatus and next-step assistance",
+			'steps'    => "Review | Check business verification, display name, account activity and public presence.\nPrepare | Gather accurate business details and supporting references.\nApply | Submit through the authorised WhatsApp platform workflow.\nRespond | Review the outcome and plan any eligible next step.",
+			'note'     => 'The verified badge is awarded solely at Meta’s discretion. Design4web cannot guarantee approval or influence Meta’s final decision.',
+		),
+	);
+
+	foreach ( $products as $order => $product ) {
+		$post = get_page_by_path( $order, OBJECT, 'd4w_product' );
+		if ( ! $post ) {
+			$post_id = wp_insert_post(
+				array(
+					'post_type'    => 'd4w_product',
+					'post_status'  => 'publish',
+					'post_title'   => $product['title'],
+					'post_name'    => $order,
+					'post_excerpt' => $product['excerpt'],
+					'post_content' => $product['content'],
+					'menu_order'   => array_search( $order, array_keys( $products ), true ),
+				)
+			);
+		} else {
+			$post_id = $post->ID;
+			$update  = array( 'ID' => $post_id, 'menu_order' => array_search( $order, array_keys( $products ), true ) );
+			if ( ! trim( $post->post_excerpt ) ) {
+				$update['post_excerpt'] = $product['excerpt'];
+			}
+			if ( ! trim( $post->post_content ) ) {
+				$update['post_content'] = $product['content'];
+			}
+			wp_update_post( $update );
+		}
+
+		if ( ! $post_id || is_wp_error( $post_id ) ) {
+			continue;
+		}
+		$meta = array(
+			'_d4w_product_kicker'   => $product['kicker'],
+			'_d4w_product_icon'     => $product['icon'],
+			'_d4w_product_accent'   => $product['accent'],
+			'_d4w_product_features' => $product['features'],
+			'_d4w_product_steps'    => $product['steps'],
+			'_d4w_product_note'     => $product['note'],
+		);
+		foreach ( $meta as $key => $value ) {
+			if ( ! get_post_meta( $post_id, $key, true ) ) {
+				update_post_meta( $post_id, $key, $value );
+			}
+		}
+	}
+}
+
+/**
+ * Create editable pricing cards and a small admin-managed social feed.
+ */
+function d4w_upgrade_growth_supporting_content() {
+	$plans = array(
+		array( 'Foundation', 'A focused launch package for businesses preparing their first structured WhatsApp customer journey.', 'Custom scope', 'setup engagement', 'Custom scope', 'project or annual plan', 'Start here', "Readiness and platform guidance\nBusiness API setup support\nOne priority customer journey\nLink, QR and website entry points\nLaunch testing and handover", 'Plan my launch', false ),
+		array( 'Growth Engine', 'An ongoing marketing system for teams ready to run campaigns, capture leads and improve follow-up.', 'Custom scope', 'managed monthly', 'Custom scope', 'campaign programme', 'Most popular', "Everything in Foundation\nAudience and opt-in planning\nCampaign templates and creative\nBroadcast workflow support\nLanding page integration\nMonthly performance review", 'Build my growth plan', true ),
+		array( 'Automation Suite', 'A connected automation programme for chatbots, AI assistance and deeper business-tool integrations.', 'Custom scope', 'managed monthly', 'Custom scope', 'implementation programme', 'For scale', "Everything in Growth Engine\nNo-code chatbot journeys\nAI knowledge preparation\nCRM and API planning\nHuman escalation design\nOptimisation roadmap", 'Scope automation', false ),
+	);
+	foreach ( $plans as $order => $plan ) {
+		$post = d4w_find_seeded_post( $plan[0], 'd4w_plan' );
+		if ( ! $post ) {
+			$post_id = wp_insert_post( array( 'post_type' => 'd4w_plan', 'post_status' => 'publish', 'post_title' => $plan[0], 'post_content' => $plan[1], 'menu_order' => $order ) );
+		} else {
+			$post_id = $post->ID;
+			wp_update_post( array( 'ID' => $post_id, 'menu_order' => $order ) );
+		}
+		if ( ! $post_id || is_wp_error( $post_id ) ) {
+			continue;
+		}
+		$meta = array(
+			'_d4w_plan_monthly'      => $plan[2],
+			'_d4w_plan_monthly_note' => $plan[3],
+			'_d4w_plan_yearly'       => $plan[4],
+			'_d4w_plan_yearly_note'  => $plan[5],
+			'_d4w_plan_badge'        => $plan[6],
+			'_d4w_plan_features'     => $plan[7],
+			'_d4w_plan_cta'          => $plan[8],
+			'_d4w_plan_featured'     => $plan[9] ? '1' : '0',
+		);
+		foreach ( $meta as $key => $value ) {
+			if ( '' === (string) get_post_meta( $post_id, $key, true ) ) {
+				update_post_meta( $post_id, $key, $value );
+			}
+		}
+	}
+
+	if ( ! get_posts( array( 'post_type' => 'd4w_social', 'post_status' => 'any', 'posts_per_page' => 1 ) ) ) {
+		$social_posts = array(
+			array( 'Website systems in motion', 'A closer look at responsive interfaces, thoughtful details and clean digital hand-offs.', 'project-1.jpg' ),
+			array( 'Brand moments with purpose', 'Identity and campaign ideas designed to remain recognisable across every touchpoint.', 'project-4.jpg' ),
+			array( 'Campaign ideas made tangible', 'Visual experiments, launch thinking and conversion-focused creative from the studio.', 'project-3.jpg' ),
+		);
+		foreach ( $social_posts as $order => $social ) {
+			$post_id = wp_insert_post( array( 'post_type' => 'd4w_social', 'post_status' => 'publish', 'post_title' => $social[0], 'post_excerpt' => $social[1], 'menu_order' => $order ) );
+			if ( $post_id && ! is_wp_error( $post_id ) ) {
+				update_post_meta( $post_id, '_d4w_social_platform', 'Studio feed' );
+				update_post_meta( $post_id, '_d4w_social_handle', 'Design4web' );
+				update_post_meta( $post_id, '_d4w_bundled_image', $social[2] );
+			}
+		}
+	}
+
+	$reviews = get_posts( array( 'post_type' => 'd4w_testimonial', 'post_status' => 'any', 'posts_per_page' => -1, 'no_found_rows' => true ) );
+	foreach ( $reviews as $review ) {
+		if ( ! get_post_meta( $review->ID, '_d4w_review_source', true ) ) {
+			update_post_meta( $review->ID, '_d4w_review_source', 'Client feedback' );
+		}
 	}
 }
 
@@ -333,6 +544,131 @@ function d4w_upgrade_supporting_content() {
 }
 
 /**
+ * Find or create a menu item while preserving editor-managed navigation.
+ *
+ * @param int    $menu_id   Menu term ID.
+ * @param string $title     Item title.
+ * @param string $url       Item URL.
+ * @param int    $parent_id Parent menu item ID.
+ * @param int    $object_id Optional post ID.
+ * @param string $object    Optional post type.
+ * @return int
+ */
+function d4w_ensure_menu_item( $menu_id, $title, $url, $parent_id = 0, $object_id = 0, $object = '' ) {
+	$items = wp_get_nav_menu_items( $menu_id );
+	foreach ( $items ?: array() as $item ) {
+		$object_match = $object_id && (int) $item->object_id === (int) $object_id && $object === $item->object;
+		$title_match  = ! $object_id && 0 === strcasecmp( wp_specialchars_decode( $item->title, ENT_QUOTES ), $title );
+		if ( ! $object_match && ! $title_match ) {
+			continue;
+		}
+		if ( $parent_id && (int) $item->menu_item_parent !== (int) $parent_id ) {
+			wp_update_nav_menu_item(
+				$menu_id,
+				$item->ID,
+				array(
+					'menu-item-title'     => $item->title,
+					'menu-item-parent-id' => $parent_id,
+					'menu-item-object-id' => $object_id ?: $item->object_id,
+					'menu-item-object'    => $object ?: $item->object,
+					'menu-item-type'      => $object_id ? 'post_type' : $item->type,
+					'menu-item-url'       => $object_id ? '' : $url,
+					'menu-item-status'    => 'publish',
+				)
+			);
+		}
+		return (int) $item->ID;
+	}
+
+	$args = array(
+		'menu-item-title'     => $title,
+		'menu-item-parent-id' => $parent_id,
+		'menu-item-status'    => 'publish',
+	);
+	if ( $object_id && $object ) {
+		$args['menu-item-object-id'] = $object_id;
+		$args['menu-item-object']    = $object;
+		$args['menu-item-type']      = 'post_type';
+	} else {
+		$args['menu-item-url']  = $url;
+		$args['menu-item-type'] = 'custom';
+	}
+	$item_id = wp_update_nav_menu_item( $menu_id, 0, $args );
+	return is_wp_error( $item_id ) ? 0 : (int) $item_id;
+}
+
+/**
+ * Ensure the primary menu exposes services, products and pricing after an
+ * in-place upgrade without replacing the user's other menu choices.
+ *
+ * @param int $menu_id Menu term ID.
+ */
+function d4w_upgrade_primary_menu( $menu_id ) {
+	if ( ! $menu_id ) {
+		return;
+	}
+	d4w_ensure_menu_item( $menu_id, 'Services', get_post_type_archive_link( 'd4w_service' ) ?: home_url( '/services/' ) );
+	$products_id = d4w_ensure_menu_item( $menu_id, 'Products', get_post_type_archive_link( 'd4w_product' ) ?: home_url( '/products/' ) );
+	d4w_ensure_menu_item( $menu_id, 'Work', get_post_type_archive_link( 'd4w_project' ) ?: home_url( '/work/' ) );
+	d4w_ensure_menu_item( $menu_id, 'Pricing', d4w_page_url( 'pricing' ) );
+
+	if ( ! $products_id ) {
+		return;
+	}
+	$products = get_posts(
+		array(
+			'post_type'      => 'd4w_product',
+			'post_status'    => 'publish',
+			'posts_per_page' => -1,
+			'orderby'        => array( 'menu_order' => 'ASC', 'date' => 'ASC' ),
+			'no_found_rows'  => true,
+		)
+	);
+	foreach ( $products as $product ) {
+		d4w_ensure_menu_item( $menu_id, $product->post_title, get_permalink( $product ), $products_id, $product->ID, 'd4w_product' );
+	}
+
+	$items       = wp_get_nav_menu_items( $menu_id );
+	$desired     = array( 'Home', 'About', 'Services', 'Products', 'Work', 'Pricing', 'Journal', 'Contact' );
+	$product_nav = array();
+	foreach ( $items ?: array() as $item ) {
+		if ( 'd4w_product' === $item->object && (int) $item->menu_item_parent === $products_id ) {
+			$product_nav[] = $item;
+		}
+	}
+	usort(
+		$product_nav,
+		function ( $a, $b ) {
+			return (int) get_post_field( 'menu_order', $a->object_id ) <=> (int) get_post_field( 'menu_order', $b->object_id );
+		}
+	);
+
+	$position = 1;
+	$placed   = array();
+	foreach ( $desired as $title ) {
+		foreach ( $items ?: array() as $item ) {
+			if ( (int) $item->menu_item_parent || 0 !== strcasecmp( wp_specialchars_decode( $item->title, ENT_QUOTES ), $title ) ) {
+				continue;
+			}
+			wp_update_post( array( 'ID' => $item->ID, 'menu_order' => $position++ ) );
+			$placed[] = (int) $item->ID;
+			if ( 'Products' === $title ) {
+				foreach ( $product_nav as $product_item ) {
+					wp_update_post( array( 'ID' => $product_item->ID, 'menu_order' => $position++ ) );
+					$placed[] = (int) $product_item->ID;
+				}
+			}
+			break;
+		}
+	}
+	foreach ( $items ?: array() as $item ) {
+		if ( ! in_array( (int) $item->ID, $placed, true ) ) {
+			wp_update_post( array( 'ID' => $item->ID, 'menu_order' => $position++ ) );
+		}
+	}
+}
+
+/**
  * Create the multipage structure and navigation for new and upgraded installs.
  */
 function d4w_upgrade_site_structure() {
@@ -341,13 +677,18 @@ function d4w_upgrade_site_structure() {
 	$about_id      = d4w_ensure_page( 'About', 'about', $about_content );
 	$contact_id    = d4w_ensure_page( 'Contact', 'contact' );
 	$blog_id       = d4w_ensure_page( 'Journal', 'journal' );
+	$pricing_id    = d4w_ensure_page( 'Pricing', 'pricing' );
 	$about_template = $about_id ? get_post_meta( $about_id, '_wp_page_template', true ) : '';
 	$contact_template = $contact_id ? get_post_meta( $contact_id, '_wp_page_template', true ) : '';
+	$pricing_template = $pricing_id ? get_post_meta( $pricing_id, '_wp_page_template', true ) : '';
 	if ( $about_id && ( ! $about_template || 'default' === $about_template ) ) {
 		update_post_meta( $about_id, '_wp_page_template', 'page-about.php' );
 	}
 	if ( $contact_id && ( ! $contact_template || 'default' === $contact_template ) ) {
 		update_post_meta( $contact_id, '_wp_page_template', 'page-contact.php' );
+	}
+	if ( $pricing_id && ( ! $pricing_template || 'default' === $pricing_template ) ) {
+		update_post_meta( $pricing_id, '_wp_page_template', 'page-pricing.php' );
 	}
 
 	if ( $home_id && ! (int) get_option( 'page_on_front' ) ) {
@@ -378,11 +719,13 @@ function d4w_upgrade_site_structure() {
 		$menu_id   = $menu ? (int) $menu->term_id : wp_create_nav_menu( $menu_name );
 		if ( ! is_wp_error( $menu_id ) ) {
 			if ( ! wp_get_nav_menu_items( $menu_id ) ) {
-				$items = array(
-					array( 'Home', $home_id ? get_permalink( $home_id ) : home_url( '/' ) ),
-					array( 'About', $about_id ? get_permalink( $about_id ) : home_url( '/about/' ) ),
-					array( 'Services', get_post_type_archive_link( 'd4w_service' ) ?: home_url( '/services/' ) ),
-					array( 'Work', get_post_type_archive_link( 'd4w_project' ) ?: home_url( '/work/' ) ),
+					$items = array(
+						array( 'Home', $home_id ? get_permalink( $home_id ) : home_url( '/' ) ),
+						array( 'About', $about_id ? get_permalink( $about_id ) : home_url( '/about/' ) ),
+						array( 'Services', get_post_type_archive_link( 'd4w_service' ) ?: home_url( '/services/' ) ),
+						array( 'Products', get_post_type_archive_link( 'd4w_product' ) ?: home_url( '/products/' ) ),
+						array( 'Work', get_post_type_archive_link( 'd4w_project' ) ?: home_url( '/work/' ) ),
+						array( 'Pricing', $pricing_id ? get_permalink( $pricing_id ) : home_url( '/pricing/' ) ),
 					array( 'Journal', $blog_id ? get_permalink( $blog_id ) : home_url( '/journal/' ) ),
 					array( 'Contact', $contact_id ? get_permalink( $contact_id ) : home_url( '/contact/' ) ),
 				);
@@ -397,6 +740,11 @@ function d4w_upgrade_site_structure() {
 			set_theme_mod( 'nav_menu_locations', $locations );
 		}
 	}
+
+	$locations = get_theme_mod( 'nav_menu_locations', array() );
+	if ( ! empty( $locations['primary'] ) ) {
+		d4w_upgrade_primary_menu( (int) $locations['primary'] );
+	}
 }
 
 /**
@@ -408,6 +756,8 @@ function d4w_run_schema_upgrade() {
 	}
 	d4w_upgrade_services();
 	d4w_upgrade_projects();
+	d4w_upgrade_products();
+	d4w_upgrade_growth_supporting_content();
 	d4w_upgrade_supporting_content();
 	d4w_upgrade_site_structure();
 	update_option( 'd4w_schema_version', D4W_SCHEMA_VERSION );

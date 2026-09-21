@@ -32,7 +32,11 @@ function d4w_defaults() {
 		'about_title'          => 'Ideas with purpose. Design with personality. Technology that performs.',
 		'about_text'           => 'Design4web is a web development and hosting company creating strong digital identities for ambitious businesses. From the first sketch to launch and ongoing care, we keep the experience clear, collaborative and focused on results.',
 		'services_title'       => 'Everything your brand needs to look sharp and move forward.',
+		'products_title'       => 'WhatsApp products that connect campaigns, conversations and customer care.',
 		'work_title'           => 'Creative work, built to solve real business problems.',
+		'case_studies_title'    => 'A closer look at the thinking behind selected outcomes.',
+		'reviews_title'         => 'Good partnerships leave a lasting impression.',
+		'social_title'          => 'Fresh launches, visual experiments and studio moments.',
 		'tech_kicker'          => 'Technology chosen for the job—not the hype',
 		'tech_title'           => 'Flexible tools. Reliable results.',
 		'tech_list'            => "WordPress\nWooCommerce\nPHP\nLaravel\nJavaScript\njQuery\nBootstrap\nReact\nMySQL\nGoogle Cloud\nAWS\nSEO",
@@ -54,10 +58,15 @@ function d4w_defaults() {
 		'twitter_url'          => 'https://twitter.com/design4website',
 		'instagram_url'        => '',
 		'linkedin_url'         => '',
+		'google_reviews_url'    => 'https://www.google.com/maps/search/?api=1&query=Design4web+Malad+West+Mumbai',
+		'google_map_embed_url'  => '',
 		'show_services'        => true,
+		'show_products'        => true,
 		'show_projects'        => true,
+		'show_case_studies'    => true,
 		'show_process'         => true,
 		'show_testimonials'    => true,
+		'show_social'          => true,
 		'show_blog'            => true,
 	);
 }
@@ -118,9 +127,12 @@ function d4w_customize_register( $wp_customize ) {
 		'enable_motion_loops' => array( 'Enable decorative looping motion', 'd4w_brand' ),
 		'enable_cursor'     => array( 'Enable creative desktop cursor', 'd4w_brand' ),
 		'show_services'     => array( 'Show services section', 'd4w_home' ),
+		'show_products'     => array( 'Show products section', 'd4w_home' ),
 		'show_projects'     => array( 'Show projects section', 'd4w_home' ),
+		'show_case_studies' => array( 'Show case studies section', 'd4w_home' ),
 		'show_process'      => array( 'Show process section', 'd4w_home' ),
 		'show_testimonials' => array( 'Show testimonials section', 'd4w_home' ),
+		'show_social'       => array( 'Show social feed section', 'd4w_home' ),
 		'show_blog'         => array( 'Show blog section', 'd4w_home' ),
 	);
 	foreach ( $checkboxes as $id => $data ) {
@@ -139,7 +151,11 @@ function d4w_customize_register( $wp_customize ) {
 		'about_title'         => array( 'About title', 'd4w_about', 'textarea' ),
 		'about_text'          => array( 'About description', 'd4w_about', 'textarea' ),
 		'services_title'      => array( 'Services section title', 'd4w_home', 'textarea' ),
+		'products_title'      => array( 'Products section title', 'd4w_home', 'textarea' ),
 		'work_title'          => array( 'Work section title', 'd4w_home', 'textarea' ),
+		'case_studies_title'   => array( 'Case studies section title', 'd4w_home', 'textarea' ),
+		'reviews_title'        => array( 'Reviews section title', 'd4w_home', 'textarea' ),
+		'social_title'         => array( 'Social feed section title', 'd4w_home', 'textarea' ),
 		'tech_kicker'         => array( 'Technology section kicker', 'd4w_home', 'text' ),
 		'tech_title'          => array( 'Technology section title', 'd4w_home', 'text' ),
 		'tech_list'           => array( 'Technologies (one per line)', 'd4w_home', 'textarea' ),
@@ -179,6 +195,8 @@ function d4w_customize_register( $wp_customize ) {
 		'twitter_url'        => array( 'X / Twitter URL', 'd4w_contact' ),
 		'instagram_url'      => array( 'Instagram URL', 'd4w_contact' ),
 		'linkedin_url'       => array( 'LinkedIn URL', 'd4w_contact' ),
+		'google_reviews_url' => array( 'Google reviews / business profile URL', 'd4w_contact' ),
+		'google_map_embed_url' => array( 'Google Maps embed URL (optional)', 'd4w_contact' ),
 	);
 	foreach ( $url_fields as $id => $data ) {
 		$wp_customize->add_setting( 'd4w_' . $id, array( 'default' => $defaults[ $id ], 'sanitize_callback' => 'esc_url_raw' ) );

@@ -1,38 +1,44 @@
 # Design4Web Studio
 
-A custom, multipage, motion-first WordPress theme built for Design4web. Version 2.0 combines an original high-energy agency design with verified business content and portfolio material from the legacy Design4web website.
+A custom, multipage, motion-first WordPress theme built for Design4web. Version 3.0 adds a dynamic WhatsApp product suite, editable pricing routes, richer service coverage, case-study/review/social sections and a rebuilt Work experience.
 
 ## Install or update
 
-The ready-to-upload release is `design4web-studio-2.0.0.zip`.
+The ready-to-upload release is `design4web-studio-3.0.0.zip`.
 
 1. Download the ZIP without extracting it.
 2. Open **WordPress Admin → Appearance → Themes → Add New → Upload Theme**.
 3. Select the ZIP and choose **Install Now**.
 4. If WordPress detects the older theme, choose **Replace current with uploaded**.
 5. Activate it, then open **Settings → Permalinks** and click **Save Changes** once.
-6. Open **Appearance → Design4web Options** for the editing dashboard.
+6. Visit the homepage or WordPress dashboard once so the safe content migration can complete.
+7. Open **Appearance → Design4web Options** for the editing dashboard.
 
-The theme safely creates Home, About, Contact and Journal pages, configures the front/blog pages when those locations are empty, and creates a proper multipage menu when the previous menu only contains homepage anchors.
+The theme safely creates Home, About, Services, Products, Work, Pricing, Journal and Contact destinations where needed. The v3 migration seeds missing service/product/pricing/social starter content, preserves existing posts and user-edited records, and adds the six product pages below Products in the primary menu.
 
 ## Dynamic admin content
 
 - **Services** — content, excerpt, icon, label, duration, qualifier, deliverables, image and display order.
+- **Products** — title, copy, icon, kicker, benefits, workflow, accent, disclaimer and display order.
+- **Pricing Plans** — monthly/project labels, supporting notes, badge, feature list, CTA and featured state.
 - **Projects** — case-study copy, project types, client, period, industry, services, challenge, outcome, results, optional URL, image and display order.
-- **Testimonials** — quote, client, company/role, rating, photo and order.
+- **Testimonials** — quote, client, company/role, rating, source, original-review URL, photo and order.
+- **Social Feed** — Instagram/social URL, platform, handle, caption, thumbnail and order.
 - **Process Steps** — title, description, number, icon and order.
 - **FAQs** — question, answer, category and order.
 - **Team** — name, role, biography, photo, email, LinkedIn and order.
 - **Posts** — the Journal archive and article pages use normal WordPress posts.
 - **Enquiries** — every valid form submission is saved privately for administrators before the email notification is attempted.
 
-Global colors, section copy, statistics, contact details, social links, section visibility and motion settings are under **Appearance → Customize → Design4web Theme Options**. Navigation is managed under **Appearance → Menus**. Logo and site icon use **Site Identity**.
+Global colors, section copy, statistics, Google review/profile URL, map embed URL, contact details, social links, section visibility and motion settings are under **Appearance → Customize → Design4web Theme Options**. Navigation is managed under **Appearance → Menus**. Logo and site icon use **Site Identity**.
 
 ## Pages and templates
 
 - Homepage
 - About
 - Services archive and dynamic service detail pages
+- Products archive and six dynamic product detail pages
+- Creative pricing page with an editable plan-mode toggle
 - Filterable Work archive and dynamic case studies
 - Journal archive and article pages
 - Contact and FAQ page
@@ -40,7 +46,7 @@ Global colors, section copy, statistics, contact details, social links, section 
 
 ## Motion system
 
-The original motion layer includes a preloader, page transitions, split-word reveals, staggered card entrances, image curtains, expandable service rows, project filtering, parallax, counters, pointer spotlights, magnetic/ripple buttons, custom cursor, testimonial controls and rich hover/focus states.
+The original motion layer includes a preloader, page transitions, split-word reveals, staggered card entrances, image curtains, product orbits/pulses/tickers, expandable service rows, project filtering, parallax, counters, pointer spotlights, magnetic/ripple buttons, custom cursor, testimonial controls and rich hover/focus states.
 
 Under **Brand & Motion**, administrators can independently control:
 
@@ -52,6 +58,12 @@ Under **Brand & Motion**, administrators can independently control:
 - Desktop creative cursor
 
 Touch devices receive a lighter motion profile. `prefers-reduced-motion`, keyboard operation, a testimonial pause control and JavaScript-failure fallbacks are included.
+
+## Reviews, social feed and maps
+
+- Review cards are managed in **Testimonials**. Set the source and original URL for each genuine review; the theme does not scrape or invent Google reviews.
+- Social cards are managed in **Social Feed**. Upload the thumbnail and add the original Instagram/social URL; this avoids brittle unauthenticated scraping.
+- The contact map works from the saved office address without a browser API key. A custom Google Maps embed URL can be supplied in the Customizer when required.
 
 ## Front-end stack
 
@@ -66,4 +78,4 @@ The AJAX form validates and sanitizes input, verifies a nonce, uses a honeypot a
 
 ## Content and assets
 
-Legacy portfolio imagery in `assets/images/legacy` came from the client-owned Design4web website and is stored locally instead of hotlinked. Assigning a Featured Image to a project replaces its bundled fallback automatically. The Agenca reference informed interaction pacing and hierarchy only; its proprietary theme code and demo assets are not included.
+Legacy portfolio imagery in `assets/images/legacy` came from the client-owned Design4web website and is stored locally instead of hotlinked. Assigning a Featured Image to a project replaces its bundled fallback automatically. The Agenca and AiSensy references informed interaction pacing, information architecture and product grouping only; their proprietary code, copy and demo assets are not included.

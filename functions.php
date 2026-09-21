@@ -9,12 +9,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'D4W_VERSION', '2.0.0' );
+define( 'D4W_VERSION', '3.0.0' );
 define( 'D4W_DIR', get_template_directory() );
 define( 'D4W_URI', get_template_directory_uri() );
 
 require_once D4W_DIR . '/inc/customizer.php';
 require_once D4W_DIR . '/inc/template-functions.php';
+require_once D4W_DIR . '/inc/growth-content.php';
 require_once D4W_DIR . '/inc/dynamic-content.php';
 require_once D4W_DIR . '/inc/site-setup.php';
 
@@ -201,6 +202,11 @@ function d4w_order_public_archives( $query ) {
 		$query->set( 'posts_per_page', -1 );
 		$query->set( 'orderby', array( 'menu_order' => 'ASC', 'date' => 'DESC' ) );
 	}
+
+	if ( $query->is_post_type_archive( 'd4w_product' ) ) {
+		$query->set( 'posts_per_page', -1 );
+		$query->set( 'orderby', array( 'menu_order' => 'ASC', 'date' => 'ASC' ) );
+	}
 }
 add_action( 'pre_get_posts', 'd4w_order_public_archives' );
 
@@ -233,6 +239,12 @@ function d4w_meta_textarea( $post_id, $key, $label, $description = '' ) {
 	<?php
 }
 
+function d4w_meta_checkbox( $post_id, $key, $label ) {
+	?>
+	<p><label><input type="checkbox" name="<?php echo esc_attr( $key ); ?>" value="1" <?php checked( get_post_meta( $post_id, $key, true ), '1' ); ?>> <strong><?php echo esc_html( $label ); ?></strong></label></p>
+	<?php
+}
+
 function d4w_service_meta_box( $post ) {
 	wp_nonce_field( 'd4w_save_meta', 'd4w_meta_nonce' );
 	d4w_meta_field( $post->ID, '_d4w_icon', __( 'Bootstrap icon class', 'design4web' ), 'text', __( 'Example: bi-code-slash', 'design4web' ) );
@@ -255,12 +267,15 @@ function d4w_project_meta_box( $post ) {
 	d4w_meta_field( $post->ID, '_d4w_metric_two_label', __( 'Secondary result label', 'design4web' ) );
 	d4w_meta_textarea( $post->ID, '_d4w_challenge', __( 'Challenge', 'design4web' ) );
 	d4w_meta_textarea( $post->ID, '_d4w_outcome', __( 'Outcome', 'design4web' ) );
+	d4w_meta_checkbox( $post->ID, '_d4w_featured_case_study', __( 'Feature this case study on the homepage', 'design4web' ) );
 }
 
 function d4w_testimonial_meta_box( $post ) {
 	wp_nonce_field( 'd4w_save_meta', 'd4w_meta_nonce' );
 	d4w_meta_field( $post->ID, '_d4w_role', __( 'Role / company', 'design4web' ) );
 	d4w_meta_field( $post->ID, '_d4w_rating', __( 'Rating (1-5)', 'design4web' ), 'number' );
+	d4w_meta_field( $post->ID, '_d4w_review_source', __( 'Review source', 'design4web' ), 'text', __( 'Example: Google or Direct client feedback', 'design4web' ) );
+	d4w_meta_field( $post->ID, '_d4w_review_url', __( 'Original review URL', 'design4web' ), 'url' );
 }
 
 function d4w_save_meta( $post_id ) {
@@ -293,10 +308,13 @@ function d4w_save_meta( $post_id ) {
 			'_d4w_metric_two_label' => 'sanitize_text_field',
 			'_d4w_challenge'        => 'sanitize_textarea_field',
 			'_d4w_outcome'          => 'sanitize_textarea_field',
+			'_d4w_featured_case_study' => 'rest_sanitize_boolean',
 		),
 		'd4w_testimonial' => array(
-			'_d4w_role'   => 'sanitize_text_field',
-			'_d4w_rating' => 'absint',
+			'_d4w_role'          => 'sanitize_text_field',
+			'_d4w_rating'        => 'absint',
+			'_d4w_review_source' => 'sanitize_text_field',
+			'_d4w_review_url'    => 'esc_url_raw',
 		),
 	);
 	$post_type = get_post_type( $post_id );
@@ -305,6 +323,10 @@ function d4w_save_meta( $post_id ) {
 	}
 	$fields = $field_groups[ $post_type ];
 	foreach ( $fields as $key => $callback ) {
+		if ( '_d4w_featured_case_study' === $key ) {
+			update_post_meta( $post_id, $key, isset( $_POST[ $key ] ) ? '1' : '0' );
+			continue;
+		}
 		if ( isset( $_POST[ $key ] ) ) {
 			$raw = wp_unslash( $_POST[ $key ] );
 			if ( '' === trim( (string) $raw ) ) {
@@ -330,7 +352,9 @@ function d4w_primary_menu_fallback( $args = null ) {
 		__( 'Home', 'design4web' )     => home_url( '/' ),
 		__( 'About', 'design4web' )    => d4w_page_url( 'about' ),
 		__( 'Services', 'design4web' ) => get_post_type_archive_link( 'd4w_service' ) ?: home_url( '/services/' ),
+		__( 'Products', 'design4web' ) => get_post_type_archive_link( 'd4w_product' ) ?: home_url( '/products/' ),
 		__( 'Work', 'design4web' )     => get_post_type_archive_link( 'd4w_project' ) ?: home_url( '/work/' ),
+		__( 'Pricing', 'design4web' )  => d4w_page_url( 'pricing' ),
 		__( 'Journal', 'design4web' )  => d4w_page_url( 'journal' ),
 		__( 'Contact', 'design4web' )  => d4w_page_url( 'contact' ),
 	);
@@ -554,11 +578,14 @@ function d4w_options_page() {
 		<p class="description"><?php esc_html_e( 'Manage your homepage, colors, contact information and dynamic content from the links below.', 'design4web' ); ?></p>
 		<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;max-width:1100px;margin-top:24px">
 			<?php
-			$cards = array(
-				array( 'dashicons-admin-customizer', 'Brand, homepage & contact', 'Edit colors, hero copy, statistics, contact details, social links and section visibility.', admin_url( 'customize.php?autofocus[panel]=d4w_options' ), 'Open live options' ),
-				array( 'dashicons-superhero-alt', 'Services', 'Add, edit, reorder and illustrate the services shown on the homepage.', admin_url( 'edit.php?post_type=d4w_service' ), 'Manage services' ),
-				array( 'dashicons-portfolio', 'Projects', 'Publish portfolio work, categories, client details, dates and project images.', admin_url( 'edit.php?post_type=d4w_project' ), 'Manage projects' ),
-				array( 'dashicons-format-quote', 'Testimonials', 'Control client quotes, roles, ratings and profile images.', admin_url( 'edit.php?post_type=d4w_testimonial' ), 'Manage testimonials' ),
+				$cards = array(
+					array( 'dashicons-admin-customizer', 'Brand, homepage & contact', 'Edit colors, hero copy, statistics, contact details, social links and section visibility.', admin_url( 'customize.php?autofocus[panel]=d4w_options' ), 'Open live options' ),
+					array( 'dashicons-superhero-alt', 'Services', 'Add, edit, reorder and illustrate the services shown on the homepage.', admin_url( 'edit.php?post_type=d4w_service' ), 'Manage services' ),
+					array( 'dashicons-screenoptions', 'Products', 'Manage WhatsApp products, benefits, workflows, notes and page visuals.', admin_url( 'edit.php?post_type=d4w_product' ), 'Manage products' ),
+					array( 'dashicons-money-alt', 'Pricing plans', 'Edit plan names, pricing modes, features, badges and calls to action.', admin_url( 'edit.php?post_type=d4w_plan' ), 'Manage pricing' ),
+					array( 'dashicons-portfolio', 'Projects', 'Publish portfolio work, categories, client details, dates and project images.', admin_url( 'edit.php?post_type=d4w_project' ), 'Manage projects' ),
+					array( 'dashicons-format-quote', 'Testimonials', 'Control client quotes, roles, ratings and profile images.', admin_url( 'edit.php?post_type=d4w_testimonial' ), 'Manage testimonials' ),
+					array( 'dashicons-instagram', 'Social feed', 'Add approved Instagram or social posts with an image, caption and destination URL.', admin_url( 'edit.php?post_type=d4w_social' ), 'Manage social feed' ),
 				array( 'dashicons-editor-ol', 'Process steps', 'Edit the ordered Discover, Design, Build and Grow workflow used across the website.', admin_url( 'edit.php?post_type=d4w_process' ), 'Manage process' ),
 				array( 'dashicons-editor-help', 'FAQs', 'Create and reorder the questions displayed on the contact page.', admin_url( 'edit.php?post_type=d4w_faq' ), 'Manage FAQs' ),
 				array( 'dashicons-groups', 'Team', 'Add team profiles, roles, biographies, photos and professional links.', admin_url( 'edit.php?post_type=d4w_team' ), 'Manage team' ),

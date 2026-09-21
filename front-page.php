@@ -104,7 +104,7 @@ $image_dir = D4W_URI . '/assets/images/';
 		</div>
 		<div class="d4w-service-list">
 			<?php
-			$service_query = new WP_Query( array( 'post_type' => 'd4w_service', 'posts_per_page' => 8, 'orderby' => array( 'menu_order' => 'ASC', 'date' => 'ASC' ), 'no_found_rows' => true ) );
+			$service_query = new WP_Query( array( 'post_type' => 'd4w_service', 'posts_per_page' => -1, 'orderby' => array( 'menu_order' => 'ASC', 'date' => 'ASC' ), 'no_found_rows' => true ) );
 			$service_index = 0;
 			while ( $service_query->have_posts() ) :
 				$service_query->the_post();
@@ -127,11 +127,30 @@ $image_dir = D4W_URI . '/assets/images/';
 </section>
 <?php endif; ?>
 
+<?php if ( d4w_get_option( 'show_products', true ) ) : ?>
+<section id="products" class="d4w-home-products section-space-sm">
+	<div class="container-fluid d4w-shell">
+		<div class="row align-items-end mb-5 g-4"><div class="col-lg-4"><p class="d4w-section-label reveal-up"><span>Products</span><?php esc_html_e( 'WhatsApp growth stack', 'design4web' ); ?></p></div><div class="col-lg-6"><h2 class="d4w-display reveal-text"><?php echo esc_html( d4w_get_option( 'products_title' ) ); ?></h2></div><div class="col-lg-2 text-lg-end"><a class="d4w-text-link reveal-up" href="<?php echo esc_url( get_post_type_archive_link( 'd4w_product' ) ); ?>"><?php esc_html_e( 'All products', 'design4web' ); ?><i class="bi bi-arrow-right"></i></a></div></div>
+		<div class="d4w-home-product-grid">
+			<?php
+			$product_query = new WP_Query( array( 'post_type' => 'd4w_product', 'post_status' => 'publish', 'posts_per_page' => 6, 'orderby' => array( 'menu_order' => 'ASC', 'date' => 'ASC' ), 'no_found_rows' => true ) );
+			while ( $product_query->have_posts() ) :
+				$product_query->the_post();
+				$product_icon   = get_post_meta( get_the_ID(), '_d4w_product_icon', true ) ?: 'bi-box';
+				$product_accent = sanitize_hex_color( get_post_meta( get_the_ID(), '_d4w_product_accent', true ) ) ?: '#7c4dff';
+				?>
+				<a class="d4w-home-product d4w-hover-card reveal-up" href="<?php the_permalink(); ?>" style="--product-accent:<?php echo esc_attr( $product_accent ); ?>"><span class="d4w-home-product__icon"><i class="bi <?php echo esc_attr( $product_icon ); ?>"></i></span><div><small><?php echo esc_html( get_post_meta( get_the_ID(), '_d4w_product_kicker', true ) ); ?></small><h3><?php the_title(); ?></h3><p><?php echo esc_html( d4w_card_excerpt( get_the_ID(), 17 ) ); ?></p></div><i class="bi bi-arrow-up-right"></i></a>
+			<?php endwhile; wp_reset_postdata(); ?>
+		</div>
+	</div>
+</section>
+<?php endif; ?>
+
 <?php if ( d4w_get_option( 'show_projects', true ) ) : ?>
 <section id="work" class="d4w-work section-space">
 	<div class="container-fluid d4w-shell">
 		<div class="row align-items-end mb-5 g-4">
-			<div class="col-lg-4"><p class="d4w-section-label reveal-up"><span>03</span><?php esc_html_e( 'Selected work', 'design4web' ); ?></p></div>
+			<div class="col-lg-4"><p class="d4w-section-label reveal-up"><span>Work</span><?php esc_html_e( 'Our work', 'design4web' ); ?></p></div>
 			<div class="col-lg-6"><h2 class="d4w-display reveal-text"><?php echo esc_html( d4w_get_option( 'work_title' ) ); ?></h2></div>
 			<div class="col-lg-2 text-lg-end"><a class="d4w-text-link reveal-up" href="<?php echo esc_url( get_post_type_archive_link( 'd4w_project' ) ); ?>"><?php esc_html_e( 'View all work', 'design4web' ); ?><i class="bi bi-arrow-right"></i></a></div>
 		</div>
@@ -162,6 +181,27 @@ $image_dir = D4W_URI . '/assets/images/';
 	</div>
 </section>
 <?php endif; ?>
+
+<?php if ( d4w_get_option( 'show_case_studies', true ) ) : ?>
+<?php
+$case_query = new WP_Query(
+	array(
+		'post_type'      => 'd4w_project',
+		'post_status'    => 'publish',
+		'posts_per_page' => 3,
+		'meta_key'       => '_d4w_featured_case_study',
+		'meta_value'     => '1',
+		'orderby'        => array( 'menu_order' => 'ASC', 'date' => 'DESC' ),
+		'no_found_rows'  => true,
+	)
+);
+if ( $case_query->have_posts() ) : ?>
+<section class="d4w-home-cases section-space-sm">
+	<div class="container-fluid d4w-shell"><div class="row align-items-end mb-5 g-4"><div class="col-lg-4"><p class="d4w-section-label d4w-section-label--light reveal-up"><span>Cases</span><?php esc_html_e( 'Case studies', 'design4web' ); ?></p></div><div class="col-lg-6"><h2 class="d4w-display text-white reveal-text"><?php echo esc_html( d4w_get_option( 'case_studies_title' ) ); ?></h2></div><div class="col-lg-2 text-lg-end"><a class="d4w-text-link d4w-text-link--light reveal-up" href="<?php echo esc_url( get_post_type_archive_link( 'd4w_project' ) ); ?>"><?php esc_html_e( 'Read all cases', 'design4web' ); ?><i class="bi bi-arrow-right"></i></a></div></div><div class="d4w-case-strip">
+	<?php while ( $case_query->have_posts() ) : $case_query->the_post(); $case_image = d4w_feature_image_url( get_the_ID(), 'project-' . ( $case_query->current_post + 1 ) . '.jpg', 'd4w-project' ); $case_terms = get_the_terms( get_the_ID(), 'd4w_project_type' ); ?><article class="d4w-home-case reveal-up"><a class="d4w-home-case__media d4w-image-curtain" href="<?php the_permalink(); ?>"><img src="<?php echo esc_url( $case_image ); ?>" alt="<?php echo esc_attr( get_the_title() ); ?>" loading="lazy"><span><?php echo esc_html( str_pad( (string) ( $case_query->current_post + 1 ), 2, '0', STR_PAD_LEFT ) ); ?></span></a><div class="d4w-home-case__copy"><p><?php echo esc_html( $case_terms && ! is_wp_error( $case_terms ) ? $case_terms[0]->name : __( 'Digital case study', 'design4web' ) ); ?></p><h3><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3><div><?php echo esc_html( d4w_card_excerpt( get_the_ID(), 24 ) ); ?></div><a class="d4w-text-link d4w-text-link--light" href="<?php the_permalink(); ?>"><?php esc_html_e( 'Open case study', 'design4web' ); ?><i class="bi bi-arrow-up-right"></i></a></div></article><?php endwhile; wp_reset_postdata(); ?>
+	</div></div>
+</section>
+<?php endif; endif; ?>
 
 <section class="d4w-tech section-space-sm">
 	<div class="container-fluid d4w-shell text-center">
@@ -213,20 +253,23 @@ $testimonial_cover       = $testimonial_cover_posts ? d4w_feature_image_url( $te
 			</div>
 			<div class="col-lg-8">
 				<div class="d-flex justify-content-between align-items-center mb-4">
-					<p class="d4w-section-label reveal-up"><span>05</span><?php esc_html_e( 'Client stories', 'design4web' ); ?></p>
+					<p class="d4w-section-label reveal-up"><span>Reviews</span><?php esc_html_e( 'Google & client feedback', 'design4web' ); ?></p>
 					<div class="d4w-slider-controls"><button class="d4w-testimonial-prev" aria-label="<?php esc_attr_e( 'Previous testimonial', 'design4web' ); ?>"><i class="bi bi-arrow-left"></i></button><button class="d4w-testimonial-toggle" aria-label="<?php esc_attr_e( 'Pause testimonial autoplay', 'design4web' ); ?>" aria-pressed="false"><i class="bi bi-pause-fill"></i></button><button class="d4w-testimonial-next" aria-label="<?php esc_attr_e( 'Next testimonial', 'design4web' ); ?>"><i class="bi bi-arrow-right"></i></button></div>
 				</div>
+				<div class="d4w-review-heading reveal-up"><h2><?php echo esc_html( d4w_get_option( 'reviews_title' ) ); ?></h2><?php if ( d4w_get_option( 'google_reviews_url' ) ) : ?><a href="<?php echo esc_url( d4w_get_option( 'google_reviews_url' ) ); ?>" target="_blank" rel="noopener noreferrer"><span class="d4w-google-g">G</span><span><?php esc_html_e( 'Find us on Google', 'design4web' ); ?></span><i class="bi bi-arrow-up-right"></i></a><?php endif; ?></div>
 				<div class="d4w-testimonial-track reveal-up">
 					<?php
 					$testimonial_query = new WP_Query( array( 'post_type' => 'd4w_testimonial', 'posts_per_page' => 10, 'orderby' => array( 'menu_order' => 'ASC', 'date' => 'DESC' ), 'no_found_rows' => true ) );
 					while ( $testimonial_query->have_posts() ) :
 						$testimonial_query->the_post();
-						$rating = min( 5, max( 1, (int) get_post_meta( get_the_ID(), '_d4w_rating', true ) ) );
+						$rating        = min( 5, max( 1, (int) get_post_meta( get_the_ID(), '_d4w_rating', true ) ) );
+						$review_source = get_post_meta( get_the_ID(), '_d4w_review_source', true ) ?: __( 'Client feedback', 'design4web' );
+						$review_url    = get_post_meta( get_the_ID(), '_d4w_review_url', true );
 						?>
 						<article class="d4w-testimonial-slide">
 							<div class="d4w-stars"><?php for ( $star = 0; $star < $rating; $star++ ) : ?><i class="bi bi-star-fill"></i><?php endfor; ?></div>
 							<blockquote>“<?php echo esc_html( wp_strip_all_tags( get_the_content() ) ); ?>”</blockquote>
-							<div class="d4w-testimonial-author"><?php if ( has_post_thumbnail() ) : the_post_thumbnail( 'thumbnail', array( 'loading' => 'lazy' ) ); else : ?><span class="d4w-testimonial-avatar" aria-hidden="true"><?php echo esc_html( strtoupper( substr( get_the_title(), 0, 1 ) ) ); ?></span><?php endif; ?><div><strong><?php the_title(); ?></strong><span><?php echo esc_html( get_post_meta( get_the_ID(), '_d4w_role', true ) ); ?></span></div></div>
+							<div class="d4w-testimonial-author"><?php if ( has_post_thumbnail() ) : the_post_thumbnail( 'thumbnail', array( 'loading' => 'lazy' ) ); else : ?><span class="d4w-testimonial-avatar" aria-hidden="true"><?php echo esc_html( strtoupper( substr( get_the_title(), 0, 1 ) ) ); ?></span><?php endif; ?><div><strong><?php the_title(); ?></strong><span><?php echo esc_html( get_post_meta( get_the_ID(), '_d4w_role', true ) ); ?></span><?php if ( $review_url ) : ?><a href="<?php echo esc_url( $review_url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $review_source ); ?><i class="bi bi-arrow-up-right"></i></a><?php else : ?><small><?php echo esc_html( $review_source ); ?></small><?php endif; ?></div></div>
 						</article>
 					<?php endwhile; wp_reset_postdata(); ?>
 				</div>
@@ -262,6 +305,15 @@ $testimonial_cover       = $testimonial_cover_posts ? d4w_feature_image_url( $te
 	</div>
 </section>
 <?php endif; ?>
+
+<?php if ( d4w_get_option( 'show_social', true ) ) : ?>
+<?php $social_query = new WP_Query( array( 'post_type' => 'd4w_social', 'post_status' => 'publish', 'posts_per_page' => 6, 'orderby' => array( 'menu_order' => 'ASC', 'date' => 'DESC' ), 'no_found_rows' => true ) ); if ( $social_query->have_posts() ) : ?>
+<section class="d4w-social-feed section-space-sm"><div class="container-fluid d4w-shell"><div class="row align-items-end mb-5 g-4"><div class="col-lg-4"><p class="d4w-section-label reveal-up"><span>Social</span><?php esc_html_e( 'Studio & Instagram feed', 'design4web' ); ?></p></div><div class="col-lg-6"><h2 class="d4w-display reveal-text"><?php echo esc_html( d4w_get_option( 'social_title' ) ); ?></h2></div><div class="col-lg-2 text-lg-end"><?php if ( d4w_get_option( 'instagram_url' ) ) : ?><a class="d4w-text-link reveal-up" href="<?php echo esc_url( d4w_get_option( 'instagram_url' ) ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Follow Instagram', 'design4web' ); ?><i class="bi bi-instagram"></i></a><?php endif; ?></div></div><div class="d4w-social-grid">
+	<?php while ( $social_query->have_posts() ) : $social_query->the_post(); $social_url = get_post_meta( get_the_ID(), '_d4w_social_url', true ) ?: d4w_get_option( 'instagram_url' ); $social_image = d4w_feature_image_url( get_the_ID(), 'project-' . ( ( $social_query->current_post % 4 ) + 1 ) . '.jpg', 'large' ); $social_tag = $social_url ? 'a' : 'article'; ?>
+	<<?php echo esc_attr( $social_tag ); ?> class="d4w-social-card d4w-image-curtain reveal-up" <?php if ( $social_url ) : ?>href="<?php echo esc_url( $social_url ); ?>" target="_blank" rel="noopener noreferrer"<?php endif; ?>><img src="<?php echo esc_url( $social_image ); ?>" alt="<?php echo esc_attr( get_the_title() ); ?>" loading="lazy"><span class="d4w-social-card__overlay"><span><i class="bi bi-instagram"></i><?php echo esc_html( get_post_meta( get_the_ID(), '_d4w_social_handle', true ) ?: get_bloginfo( 'name' ) ); ?></span><strong><?php the_title(); ?></strong><small><?php echo esc_html( d4w_card_excerpt( get_the_ID(), 16 ) ); ?></small></span></<?php echo esc_attr( $social_tag ); ?>>
+	<?php endwhile; wp_reset_postdata(); ?>
+</div></div></section>
+<?php endif; endif; ?>
 
 <?php d4w_contact_panel( 'home' ); ?>
 

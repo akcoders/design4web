@@ -51,7 +51,7 @@
 				</a>
 			</div>
 
-			<nav class="d-none d-lg-flex align-items-center ms-auto" aria-label="<?php esc_attr_e( 'Primary navigation', 'design4web' ); ?>">
+			<nav class="d-none d-xl-flex align-items-center ms-auto" aria-label="<?php esc_attr_e( 'Primary navigation', 'design4web' ); ?>">
 				<?php
 				wp_nav_menu(
 					array(
@@ -65,11 +65,11 @@
 				?>
 			</nav>
 
-			<a class="d4w-header-cta d-none d-lg-inline-flex magnetic" href="<?php echo esc_url( d4w_page_url( 'contact', home_url( '/#contact' ) ) ); ?>">
+			<a class="d4w-header-cta d-none d-xl-inline-flex magnetic" href="<?php echo esc_url( d4w_page_url( 'contact', home_url( '/#contact' ) ) ); ?>">
 				<span><?php esc_html_e( 'Let’s talk', 'design4web' ); ?></span><i class="bi bi-arrow-up-right"></i>
 			</a>
 
-			<button class="d4w-menu-toggle d-lg-none" type="button" aria-expanded="false" aria-controls="d4w-mobile-menu" aria-label="<?php esc_attr_e( 'Open menu', 'design4web' ); ?>">
+			<button class="d4w-menu-toggle d-xl-none" type="button" aria-expanded="false" aria-controls="d4w-mobile-menu" aria-label="<?php esc_attr_e( 'Open menu', 'design4web' ); ?>">
 				<span></span><span></span>
 			</button>
 		</div>

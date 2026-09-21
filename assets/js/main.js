@@ -58,14 +58,8 @@
     var $header = $('.site-header');
 
     $('.d4w-scroll-progress').css('transform', 'scaleX(' + (progress / 100) + ')');
-    $header.toggleClass('is-sticky', current > 70);
+    $header.toggleClass('is-sticky', current > 24).removeClass('is-hidden');
     $('.d4w-back-top').toggleClass('is-visible', current > 650);
-
-    if (current > 450 && current > lastScroll + 8 && !$body.hasClass('menu-open')) {
-      $header.addClass('is-hidden');
-    } else if (current < lastScroll - 8 || current < 100) {
-      $header.removeClass('is-hidden');
-    }
 
     if (motionEnabled) {
       if (parallaxEnabled) {
@@ -123,6 +117,8 @@
     });
 
     $menu.on('click', 'a', function () {
+      var $parent = $(this).parent();
+      if ($parent.hasClass('menu-item-has-children') && !$parent.hasClass('is-submenu-open')) return;
       setMenu(false);
     });
 
@@ -145,9 +141,12 @@
     });
 
     $menu.find('.menu-item-has-children > a').on('click', function (event) {
-      if (!$(this).attr('href') || $(this).attr('href') === '#') {
+      var $parent = $(this).parent();
+      if (!$parent.hasClass('is-submenu-open')) {
         event.preventDefault();
-        $(this).next('.sub-menu').stop(true, true).slideToggle(250);
+        $parent.siblings('.menu-item-has-children').removeClass('is-submenu-open').children('a').attr('aria-expanded', 'false').next('.sub-menu').stop(true, true).slideUp(250);
+        $parent.addClass('is-submenu-open');
+        $(this).attr('aria-expanded', 'true').next('.sub-menu').stop(true, true).slideDown(250);
       }
     });
   }
@@ -194,6 +193,13 @@
       '.d4w-portfolio-card h2 a',
       '.d4w-journal-card h2 a',
       '.d4w-related-card h3',
+	  '.d4w-product-card h2',
+	  '.d4w-home-product h3',
+	  '.d4w-home-case h3',
+	  '.d4w-work-card h2 a',
+	  '.d4w-price-card h2',
+	  '.d4w-product-benefit h3',
+	  '.d4w-product-step h3',
       '.d4w-value-card h3',
       '.d4w-process-step h3',
       '.d4w-timeline__item h3',
@@ -241,6 +247,9 @@
       { selector: '.d4w-service-expander', variant: 'motion-left' },
       { selector: '.d4w-project-card', variant: 'motion-mask' },
       { selector: '.d4w-portfolio-card', variant: 'motion-mask' },
+	  { selector: '.d4w-product-card, .d4w-home-product, .d4w-price-card, .d4w-product-benefit', variant: 'motion-scale' },
+	  { selector: '.d4w-home-case, .d4w-work-card, .d4w-social-card', variant: 'motion-mask' },
+	  { selector: '.d4w-product-step, .d4w-pricing-includes__grid article', variant: 'motion-right' },
       { selector: '.d4w-process-step', variant: 'motion-right' },
       { selector: '.d4w-post-card', variant: 'motion-scale' },
       { selector: '.d4w-journal-card', variant: 'motion-scale' },
@@ -276,7 +285,7 @@
 
   function initSpotlights() {
     if (!motionEnabled || window.matchMedia('(pointer: coarse)').matches) return;
-    var selector = '.d4w-service-item, .d4w-process-step, .d4w-post-card, .d4w-stats > div, .d4w-contact-form, .d4w-related-card, .d4w-value-card, .d4w-contact-info-card, .d4w-journal-card, .d4w-case-metric, .d4w-team-card';
+    var selector = '.d4w-service-item, .d4w-process-step, .d4w-post-card, .d4w-stats > div, .d4w-contact-form, .d4w-related-card, .d4w-value-card, .d4w-contact-info-card, .d4w-journal-card, .d4w-case-metric, .d4w-team-card, .d4w-product-card, .d4w-home-product, .d4w-price-card, .d4w-product-benefit, .d4w-product-step';
 
     $(selector).each(function () {
       if (!$(this).children('.d4w-card-glow').length) {
@@ -535,8 +544,37 @@
           observer.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.55 });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.01 });
     counters.forEach(function (counter) { observer.observe(counter); });
+
+    window.setTimeout(function () {
+      counters.forEach(function (counter) {
+        var rect = counter.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) runCounter(counter);
+      });
+    }, 1400);
+  }
+
+  function initPricingToggle() {
+    var $buttons = $('[data-pricing-mode]');
+    if (!$buttons.length) return;
+
+    $buttons.on('click', function () {
+      var mode = $(this).data('pricing-mode') === 'yearly' ? 'yearly' : 'monthly';
+      $buttons.removeClass('is-active').attr('aria-pressed', 'false');
+      $(this).addClass('is-active').attr('aria-pressed', 'true');
+      $('.d4w-pricing-toggle').attr('data-active-mode', mode);
+      $('.d4w-price-card__price').each(function () {
+        var $price = $(this).find('strong');
+        var $note = $(this).find('small');
+        $(this).addClass('is-changing');
+        window.setTimeout(function () {
+          $price.text($price.data(mode));
+          $note.text($note.data(mode));
+          $price.closest('.d4w-price-card__price').removeClass('is-changing');
+        }, motionEnabled ? 180 : 0);
+      });
+    });
   }
 
   function initCursor() {
@@ -776,6 +814,7 @@
     initServicePreview();
     initProjectTilt();
     initTestimonials();
+	initPricingToggle();
     initContactForm();
     updateScrollUI();
   });

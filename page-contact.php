@@ -13,6 +13,11 @@ while ( have_posts() ) :
 	$email    = d4w_get_option( 'contact_email' );
 	$phone    = d4w_get_option( 'phone' );
 	$whatsapp = preg_replace( '/\D+/', '', d4w_get_option( 'whatsapp' ) );
+	$address  = d4w_get_option( 'address' );
+	$map_url  = d4w_get_option( 'google_map_embed_url' );
+	if ( ! $map_url ) {
+		$map_url = 'https://www.google.com/maps?q=' . rawurlencode( preg_replace( '/\s+/', ' ', $address ) ) . '&output=embed';
+	}
 	?>
 	<article <?php post_class( 'd4w-contact-page' ); ?>>
 		<header class="d4w-inner-hero d4w-contact-hero">
@@ -34,10 +39,17 @@ while ( have_posts() ) :
 			<div class="container-fluid d4w-shell"><div class="row g-5 align-items-start"><div class="col-lg-5"><p class="d4w-section-label reveal-up"><span>01</span><?php esc_html_e( 'Project enquiry', 'design4web' ); ?></p><h2 class="d4w-display reveal-text"><?php echo esc_html( d4w_get_option( 'cta_title' ) ); ?></h2><p class="d4w-lead reveal-up"><?php echo esc_html( d4w_get_option( 'cta_text' ) ); ?></p><?php if ( trim( get_the_content() ) ) : ?><div class="entry-content d4w-prose reveal-up"><?php the_content(); ?></div><?php endif; ?><div class="d4w-contact-address reveal-up"><span><?php esc_html_e( 'Office address', 'design4web' ); ?></span><p><?php echo nl2br( esc_html( d4w_get_option( 'address' ) ) ); ?></p></div></div><div class="col-lg-7"><?php d4w_contact_form( 'contact-page' ); ?></div></div></div>
 		</section>
 
+		<section class="d4w-map-section section-space-sm">
+			<div class="container-fluid d4w-shell">
+				<div class="row align-items-end g-4 mb-5"><div class="col-lg-4"><p class="d4w-section-label reveal-up"><span>02</span><?php esc_html_e( 'Visit the studio', 'design4web' ); ?></p></div><div class="col-lg-6"><h2 class="d4w-display reveal-text"><?php esc_html_e( 'Find us in Malad West, Mumbai.', 'design4web' ); ?></h2></div><div class="col-lg-2 text-lg-end"><a class="d4w-text-link reveal-up" href="https://www.google.com/maps/search/?api=1&amp;query=<?php echo esc_attr( rawurlencode( preg_replace( '/\s+/', ' ', $address ) ) ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Get directions', 'design4web' ); ?><i class="bi bi-arrow-up-right"></i></a></div></div>
+				<div class="d4w-map-frame d4w-image-curtain"><iframe src="<?php echo esc_url( $map_url ); ?>" title="<?php esc_attr_e( 'Design4web office location on Google Maps', 'design4web' ); ?>" loading="eager" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe><div class="d4w-map-address"><i class="bi bi-geo-alt-fill"></i><p><?php echo nl2br( esc_html( $address ) ); ?></p></div></div>
+			</div>
+		</section>
+
 		<?php
 		$faqs = new WP_Query( array( 'post_type' => 'd4w_faq', 'post_status' => 'publish', 'posts_per_page' => -1, 'orderby' => array( 'menu_order' => 'ASC', 'date' => 'ASC' ), 'no_found_rows' => true ) );
 		if ( $faqs->have_posts() ) : ?>
-			<section class="d4w-faq-section section-space-sm"><div class="container-fluid d4w-shell"><div class="row g-5"><div class="col-lg-4"><p class="d4w-section-label d4w-section-label--light reveal-up"><span>02</span><?php esc_html_e( 'Common questions', 'design4web' ); ?></p><h2 class="d4w-display text-white reveal-text"><?php esc_html_e( 'Useful answers before we begin.', 'design4web' ); ?></h2></div><div class="col-lg-8 d4w-faq-list">
+				<section class="d4w-faq-section section-space-sm"><div class="container-fluid d4w-shell"><div class="row g-5"><div class="col-lg-4"><p class="d4w-section-label d4w-section-label--light reveal-up"><span>03</span><?php esc_html_e( 'Common questions', 'design4web' ); ?></p><h2 class="d4w-display text-white reveal-text"><?php esc_html_e( 'Useful answers before we begin.', 'design4web' ); ?></h2></div><div class="col-lg-8 d4w-faq-list">
 				<?php $faq_index = 0; while ( $faqs->have_posts() ) : $faqs->the_post(); ++$faq_index; $faq_id = 'faq-' . get_the_ID(); $faq_open = 1 === $faq_index; $faq_category = get_post_meta( get_the_ID(), '_d4w_faq_category', true ); ?><article class="d4w-faq-item reveal-up <?php echo $faq_open ? 'is-open' : ''; ?>"><button type="button" aria-expanded="<?php echo $faq_open ? 'true' : 'false'; ?>" aria-controls="<?php echo esc_attr( $faq_id ); ?>"><span><?php echo esc_html( str_pad( (string) $faq_index, 2, '0', STR_PAD_LEFT ) ); ?></span><strong><?php if ( $faq_category ) : ?><small><?php echo esc_html( $faq_category ); ?></small><?php endif; ?><?php the_title(); ?></strong><i class="bi bi-plus-lg"></i></button><div id="<?php echo esc_attr( $faq_id ); ?>" class="d4w-faq-item__answer" aria-hidden="<?php echo $faq_open ? 'false' : 'true'; ?>" <?php echo $faq_open ? '' : 'inert'; ?>><div><?php the_content(); ?></div></div></article><?php endwhile; wp_reset_postdata(); ?>
 			</div></div></div></section>
 		<?php endif; ?>

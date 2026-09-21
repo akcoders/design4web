@@ -60,6 +60,7 @@ function d4w_lines( $value ) {
 function d4w_contact_form( $context = 'page' ) {
 	$context  = sanitize_html_class( $context );
 	$form_id  = 'd4w-contact-form-' . $context;
+	$requested_plan = isset( $_GET['plan'] ) ? sanitize_title( wp_unslash( $_GET['plan'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	$services = get_posts(
 		array(
 			'post_type'      => 'd4w_service',
@@ -84,6 +85,7 @@ function d4w_contact_form( $context = 'page' ) {
 				<label for="<?php echo esc_attr( $form_id ); ?>-service"><?php esc_html_e( 'Interested in', 'design4web' ); ?></label>
 				<select id="<?php echo esc_attr( $form_id ); ?>-service" name="service">
 					<option value=""><?php esc_html_e( 'Select a service', 'design4web' ); ?></option>
+					<?php if ( $requested_plan ) : ?><option value="<?php echo esc_attr( 'Pricing plan: ' . $requested_plan ); ?>" selected><?php echo esc_html( sprintf( __( 'Pricing plan: %s', 'design4web' ), ucwords( str_replace( '-', ' ', $requested_plan ) ) ) ); ?></option><?php endif; ?>
 					<?php foreach ( $services as $service ) : ?>
 						<option value="<?php echo esc_attr( $service->post_title ); ?>"><?php echo esc_html( $service->post_title ); ?></option>
 					<?php endforeach; ?>
