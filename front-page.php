@@ -155,23 +155,33 @@ $image_dir = D4W_URI . '/assets/images/';
 				<div class="col-lg-2 text-lg-end"><a class="d4w-text-link d4w-text-link--light reveal-up" href="<?php echo esc_url( get_post_type_archive_link( 'd4w_project' ) ); ?>"><?php esc_html_e( 'View all work', 'design4web' ); ?><i class="bi bi-arrow-right"></i></a></div>
 			</div>
 
-			<div class="d4w-work-gallery d4w-home-work__grid">
-				<?php
-				$project_query = new WP_Query( array( 'post_type' => 'd4w_project', 'posts_per_page' => 6, 'orderby' => array( 'menu_order' => 'ASC', 'date' => 'DESC' ), 'no_found_rows' => true ) );
-				$project_index = 0;
-				while ( $project_query->have_posts() ) :
-					$project_query->the_post();
-					++$project_index;
-					$image   = d4w_feature_image_url( get_the_ID(), 'project-' . min( $project_index, 5 ) . '.jpg', 'full' );
-					$summary = d4w_card_excerpt( get_the_ID(), 12 );
-					?>
-					<article class="d4w-work-card d4w-client-card reveal-up">
-						<a class="d4w-client-card__link" href="<?php the_permalink(); ?>" data-cursor-label="VIEW" aria-label="<?php echo esc_attr( sprintf( __( 'View %s case study', 'design4web' ), get_the_title() ) ); ?>">
-							<figure class="d4w-client-card__media"><img src="<?php echo esc_url( $image ); ?>" alt="<?php echo esc_attr( get_the_title() ); ?>" width="1200" height="675" loading="lazy"></figure>
-							<div class="d4w-client-card__copy"><h3><?php the_title(); ?></h3><?php if ( $summary ) : ?><p><?php echo esc_html( $summary ); ?></p><?php endif; ?></div>
-						</a>
-					</article>
-				<?php endwhile; wp_reset_postdata(); ?>
+			<div class="d4w-home-work__slider reveal-up" data-work-slider>
+				<div class="d4w-home-work__viewport" tabindex="0" role="region" aria-roledescription="carousel" aria-label="<?php esc_attr_e( 'Selected client work', 'design4web' ); ?>">
+					<div class="d4w-work-gallery d4w-home-work__track">
+						<?php
+						$project_query = new WP_Query( array( 'post_type' => 'd4w_project', 'posts_per_page' => 6, 'orderby' => array( 'menu_order' => 'ASC', 'date' => 'DESC' ), 'no_found_rows' => true ) );
+						$project_index = 0;
+						while ( $project_query->have_posts() ) :
+							$project_query->the_post();
+							++$project_index;
+							$image   = d4w_feature_image_url( get_the_ID(), 'project-' . min( $project_index, 5 ) . '.jpg', 'full' );
+							$summary = d4w_card_excerpt( get_the_ID(), 12 );
+							?>
+							<article class="d4w-work-card d4w-client-card" role="group" aria-roledescription="slide" aria-label="<?php echo esc_attr( sprintf( __( '%1$d of %2$d', 'design4web' ), $project_index, $project_query->post_count ) ); ?>">
+								<a class="d4w-client-card__link" href="<?php the_permalink(); ?>" data-cursor-label="VIEW" aria-label="<?php echo esc_attr( sprintf( __( 'View %s case study', 'design4web' ), get_the_title() ) ); ?>">
+									<figure class="d4w-client-card__media"><img src="<?php echo esc_url( $image ); ?>" alt="<?php echo esc_attr( get_the_title() ); ?>" width="1200" height="675" loading="eager"></figure>
+									<div class="d4w-client-card__copy"><h3><?php the_title(); ?></h3><?php if ( $summary ) : ?><p><?php echo esc_html( $summary ); ?></p><?php endif; ?></div>
+								</a>
+							</article>
+						<?php endwhile; wp_reset_postdata(); ?>
+					</div>
+				</div>
+				<div class="d4w-home-work__controls d4w-slider-controls">
+					<button type="button" class="d4w-home-work__prev" aria-label="<?php esc_attr_e( 'Previous work', 'design4web' ); ?>"><i class="bi bi-arrow-left"></i></button>
+					<button type="button" class="d4w-home-work__next" aria-label="<?php esc_attr_e( 'Next work', 'design4web' ); ?>"><i class="bi bi-arrow-right"></i></button>
+					<div class="d4w-home-work__dots" role="group" aria-label="<?php esc_attr_e( 'Choose work slide', 'design4web' ); ?>"></div>
+					<p class="d4w-home-work__count" aria-live="polite"><strong data-work-current>01</strong><span></span><b data-work-total>01</b></p>
+				</div>
 			</div>
 	</div>
 </section>

@@ -52,7 +52,8 @@ function d4w_defaults() {
 		'footer_intro'         => 'Websites, brands and digital systems created with curiosity, precision and a very human point of view.',
 		'footer_cta_title'     => 'Have an idea worth building? Let’s make it impossible to ignore.',
 		'phone'                => '+91 99679 96645',
-		'whatsapp'             => '919967996645',
+		'whatsapp'             => '917718958220',
+		'whatsapp_message'     => 'Hi',
 		'contact_email'        => 'info@design4web.in',
 		'address'              => "7A/B, 1st Floor, Adugiya Compound\nNear Darshan Photo Studio, Mamletdarwadi Main Road\nMalad West, Mumbai 400064, Maharashtra, India",
 		'facebook_url'         => 'https://www.facebook.com/designforwebdevelopment',
@@ -173,6 +174,7 @@ function d4w_customize_register( $wp_customize ) {
 		'footer_cta_title'    => array( 'Footer CTA title', 'd4w_contact', 'textarea' ),
 		'phone'               => array( 'Phone number', 'd4w_contact', 'text' ),
 		'whatsapp'            => array( 'WhatsApp number (digits only)', 'd4w_contact', 'text' ),
+		'whatsapp_message'    => array( 'WhatsApp pre-filled message', 'd4w_contact', 'text' ),
 		'contact_email'       => array( 'Contact email', 'd4w_contact', 'email' ),
 		'address'             => array( 'Location / address', 'd4w_contact', 'textarea' ),
 	);

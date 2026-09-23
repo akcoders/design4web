@@ -90,7 +90,7 @@ $footer_services = get_posts(
 </footer>
 
 <?php if ( d4w_get_option( 'whatsapp' ) ) : ?>
-	<a class="d4w-whatsapp magnetic" href="https://wa.me/<?php echo esc_attr( preg_replace( '/\D+/', '', d4w_get_option( 'whatsapp' ) ) ); ?>" target="_blank" rel="noopener noreferrer" aria-label="<?php esc_attr_e( 'Chat on WhatsApp', 'design4web' ); ?>">
+	<a class="d4w-whatsapp magnetic" href="<?php echo esc_url( d4w_whatsapp_url() ); ?>" target="_blank" rel="noopener noreferrer" aria-label="<?php esc_attr_e( 'Chat on WhatsApp', 'design4web' ); ?>">
 		<i class="bi bi-whatsapp"></i><span><?php esc_html_e( 'Let’s chat', 'design4web' ); ?></span>
 	</a>
 <?php endif; ?>

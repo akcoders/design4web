@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'D4W_SCHEMA_VERSION', '3.5.0' );
+define( 'D4W_SCHEMA_VERSION', '3.6.0' );
 
 /**
  * Find seeded content without relying on WP_Query's title handling. Titles
@@ -843,6 +843,11 @@ function d4w_run_schema_upgrade() {
 	d4w_upgrade_growth_supporting_content();
 	d4w_upgrade_supporting_content();
 	d4w_upgrade_site_structure();
+	if ( '1.0' !== get_option( 'd4w_whatsapp_destination_version' ) ) {
+		set_theme_mod( 'd4w_whatsapp', '917718958220' );
+		set_theme_mod( 'd4w_whatsapp_message', 'Hi' );
+		update_option( 'd4w_whatsapp_destination_version', '1.0' );
+	}
 	update_option( 'd4w_schema_version', D4W_SCHEMA_VERSION );
 	flush_rewrite_rules( false );
 }

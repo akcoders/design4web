@@ -12,7 +12,7 @@ while ( have_posts() ) :
 	the_post();
 	$email    = d4w_get_option( 'contact_email' );
 	$phone    = d4w_get_option( 'phone' );
-	$whatsapp = preg_replace( '/\D+/', '', d4w_get_option( 'whatsapp' ) );
+	$whatsapp = d4w_whatsapp_url();
 	$address  = d4w_get_option( 'address' );
 	$map_url  = d4w_get_option( 'google_map_embed_url' );
 	if ( ! $map_url ) {
@@ -29,7 +29,7 @@ while ( have_posts() ) :
 				<div class="row g-3">
 					<div class="col-md-6 col-xl-3"><a class="d4w-contact-info-card d4w-hover-card reveal-up" href="mailto:<?php echo esc_attr( $email ); ?>"><i class="bi bi-envelope"></i><span><?php esc_html_e( 'Email', 'design4web' ); ?></span><strong><?php echo esc_html( $email ); ?></strong><small><?php esc_html_e( 'Best for project briefs', 'design4web' ); ?></small></a></div>
 					<div class="col-md-6 col-xl-3"><a class="d4w-contact-info-card d4w-hover-card reveal-up" href="tel:<?php echo esc_attr( preg_replace( '/[^0-9+]/', '', $phone ) ); ?>"><i class="bi bi-telephone"></i><span><?php esc_html_e( 'Call', 'design4web' ); ?></span><strong><?php echo esc_html( $phone ); ?></strong><small><?php esc_html_e( 'Monday–Saturday', 'design4web' ); ?></small></a></div>
-					<div class="col-md-6 col-xl-3"><a class="d4w-contact-info-card d4w-hover-card reveal-up" href="https://wa.me/<?php echo esc_attr( $whatsapp ); ?>" target="_blank" rel="noopener noreferrer"><i class="bi bi-whatsapp"></i><span><?php esc_html_e( 'WhatsApp', 'design4web' ); ?></span><strong><?php esc_html_e( 'Message the team', 'design4web' ); ?></strong><small><?php esc_html_e( 'Quick questions welcome', 'design4web' ); ?></small></a></div>
+					<div class="col-md-6 col-xl-3"><a class="d4w-contact-info-card d4w-hover-card reveal-up" href="<?php echo esc_url( $whatsapp ); ?>" target="_blank" rel="noopener noreferrer"><i class="bi bi-whatsapp"></i><span><?php esc_html_e( 'WhatsApp', 'design4web' ); ?></span><strong><?php esc_html_e( 'Message the team', 'design4web' ); ?></strong><small><?php esc_html_e( 'Quick questions welcome', 'design4web' ); ?></small></a></div>
 					<div class="col-md-6 col-xl-3"><div class="d4w-contact-info-card d4w-hover-card reveal-up"><i class="bi bi-geo-alt"></i><span><?php esc_html_e( 'Studio', 'design4web' ); ?></span><strong><?php echo esc_html( d4w_get_option( 'address' ) ); ?></strong><small><?php esc_html_e( 'Mumbai, Maharashtra', 'design4web' ); ?></small></div></div>
 				</div>
 			</div>

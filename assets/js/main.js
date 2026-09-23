@@ -938,6 +938,131 @@
     });
   }
 
+  function initWorkSlider() {
+    $('[data-work-slider]').each(function () {
+      var $slider = $(this);
+      var $viewport = $slider.find('.d4w-home-work__viewport');
+      var $track = $slider.find('.d4w-home-work__track');
+      var $items = $track.children('.d4w-client-card');
+      var $previous = $slider.find('.d4w-home-work__prev');
+      var $next = $slider.find('.d4w-home-work__next');
+      var $dots = $slider.find('.d4w-home-work__dots');
+      var $current = $slider.find('[data-work-current]');
+      var $total = $slider.find('[data-work-total]');
+      var index = 0;
+      var pages = 1;
+      var visible = 2;
+      var resizeFrame = 0;
+      var touchStart = null;
+      var suppressClick = false;
+
+      if (!$viewport.length || !$track.length || !$items.length) return;
+
+      function pad(value) {
+        return String(value).padStart(2, '0');
+      }
+
+      function buildDots() {
+        $dots.empty();
+        for (var dotIndex = 0; dotIndex < pages; dotIndex += 1) {
+          $('<button type="button"></button>')
+            .attr('aria-label', 'Go to work slide ' + (dotIndex + 1))
+            .attr('data-work-slide', dotIndex)
+            .appendTo($dots);
+        }
+      }
+
+      function update(animate) {
+        var gap = parseFloat(window.getComputedStyle($track[0]).columnGap) || 0;
+        var distance = index * ($viewport[0].clientWidth + gap);
+        if (animate === false) $track.css('transition', 'none');
+        $track.css('transform', 'translate3d(' + (-distance) + 'px, 0, 0)');
+        if (animate === false) {
+          $track[0].offsetHeight;
+          $track.css('transition', '');
+        }
+
+        $current.text(pad(index + 1));
+        $total.text(pad(pages));
+        $dots.children().removeClass('is-active').attr('aria-current', 'false').eq(index).addClass('is-active').attr('aria-current', 'true');
+
+        var firstVisible = index * visible;
+        var lastVisible = firstVisible + visible;
+        $items.each(function (itemIndex) {
+          var active = itemIndex >= firstVisible && itemIndex < lastVisible;
+          $(this).toggleClass('is-slide-active', active).attr('aria-hidden', active ? 'false' : 'true');
+          $(this).find('a').attr('tabindex', active ? null : '-1');
+        });
+      }
+
+      function measure(animate) {
+        var nextVisible = window.matchMedia('(max-width: 767.98px)').matches ? 1 : 2;
+        var nextPages = Math.max(1, Math.ceil($items.length / nextVisible));
+        if (nextVisible !== visible || nextPages !== pages || !$dots.children().length) {
+          visible = nextVisible;
+          pages = nextPages;
+          index = Math.min(index, pages - 1);
+          buildDots();
+        }
+        update(animate);
+      }
+
+      function goTo(nextIndex) {
+        index = (nextIndex + pages) % pages;
+        update(true);
+      }
+
+      $previous.on('click', function () { goTo(index - 1); });
+      $next.on('click', function () { goTo(index + 1); });
+      $dots.on('click', 'button', function () { goTo(Number($(this).attr('data-work-slide')) || 0); });
+      $viewport.on('keydown', function (event) {
+        if (event.key === 'ArrowLeft') {
+          event.preventDefault();
+          goTo(index - 1);
+        } else if (event.key === 'ArrowRight') {
+          event.preventDefault();
+          goTo(index + 1);
+        }
+      });
+
+      $viewport.on('touchstart', function (event) {
+        var touch = event.originalEvent.touches[0];
+        touchStart = touch ? { x: touch.clientX, y: touch.clientY } : null;
+      });
+      $viewport.on('touchend', function (event) {
+        if (!touchStart) return;
+        var touch = event.originalEvent.changedTouches[0];
+        if (!touch) return;
+        var deltaX = touch.clientX - touchStart.x;
+        var deltaY = touch.clientY - touchStart.y;
+        touchStart = null;
+        if (Math.abs(deltaX) > 45 && Math.abs(deltaX) > Math.abs(deltaY)) {
+          suppressClick = true;
+          goTo(index + (deltaX < 0 ? 1 : -1));
+          window.setTimeout(function () { suppressClick = false; }, 350);
+        }
+      });
+      $viewport.on('click', 'a', function (event) {
+        if (suppressClick) event.preventDefault();
+      });
+
+      function requestMeasure() {
+        if (resizeFrame) window.cancelAnimationFrame(resizeFrame);
+        resizeFrame = window.requestAnimationFrame(function () {
+          resizeFrame = 0;
+          measure(false);
+        });
+      }
+
+      window.addEventListener('resize', requestMeasure);
+      if ('ResizeObserver' in window) {
+        var observer = new ResizeObserver(requestMeasure);
+        observer.observe($viewport[0]);
+      }
+      measure(false);
+    });
+  }
+
   function initTestimonials() {
     $('.d4w-testimonials').each(function () {
       var $region = $(this);
@@ -1071,6 +1196,7 @@
     initWordReveals();
     initChoreography();
     initSectionMeters();
+    initWorkSlider();
     cacheScrollElements();
     initReveals();
     initCounters();

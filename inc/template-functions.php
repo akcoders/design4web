@@ -53,6 +53,21 @@ function d4w_lines( $value ) {
 }
 
 /**
+ * Return the admin-managed click-to-chat destination.
+ *
+ * @return string
+ */
+function d4w_whatsapp_url() {
+	$number  = preg_replace( '/\D+/', '', d4w_get_option( 'whatsapp' ) );
+	$message = trim( (string) d4w_get_option( 'whatsapp_message', 'Hi' ) );
+	$url     = 'https://wa.me/' . $number;
+	if ( $message ) {
+		$url .= '?text=' . rawurlencode( $message );
+	}
+	return $url;
+}
+
+/**
  * Render the shared AJAX enquiry form.
  *
  * @param string $context Unique form context.
