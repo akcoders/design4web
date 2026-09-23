@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'D4W_SCHEMA_VERSION', '3.0.0' );
+define( 'D4W_SCHEMA_VERSION', '3.3.0' );
 
 /**
  * Find seeded content without relying on WP_Query's title handling. Titles
@@ -598,8 +598,8 @@ function d4w_ensure_menu_item( $menu_id, $title, $url, $parent_id = 0, $object_i
 }
 
 /**
- * Ensure the primary menu exposes services, products and pricing after an
- * in-place upgrade without replacing the user's other menu choices.
+ * Keep the primary navigation aligned with the approved site architecture.
+ * Product children remain dynamic and keep their admin-defined order.
  *
  * @param int $menu_id Menu term ID.
  */
@@ -607,10 +607,16 @@ function d4w_upgrade_primary_menu( $menu_id ) {
 	if ( ! $menu_id ) {
 		return;
 	}
-	d4w_ensure_menu_item( $menu_id, 'Services', get_post_type_archive_link( 'd4w_service' ) ?: home_url( '/services/' ) );
+
+	$desired_items = array();
+	$desired_items['Home'] = d4w_ensure_menu_item( $menu_id, 'Home', home_url( '/' ) );
+	$desired_items['About'] = d4w_ensure_menu_item( $menu_id, 'About', d4w_page_url( 'about' ) );
+	$desired_items['Services'] = d4w_ensure_menu_item( $menu_id, 'Services', get_post_type_archive_link( 'd4w_service' ) ?: home_url( '/services/' ) );
 	$products_id = d4w_ensure_menu_item( $menu_id, 'Products', get_post_type_archive_link( 'd4w_product' ) ?: home_url( '/products/' ) );
-	d4w_ensure_menu_item( $menu_id, 'Work', get_post_type_archive_link( 'd4w_project' ) ?: home_url( '/work/' ) );
-	d4w_ensure_menu_item( $menu_id, 'Pricing', d4w_page_url( 'pricing' ) );
+	$desired_items['Products'] = $products_id;
+	$desired_items['Clients'] = d4w_ensure_menu_item( $menu_id, 'Clients', get_post_type_archive_link( 'd4w_project' ) ?: home_url( '/work/' ) );
+	$desired_items['Testimonial'] = d4w_ensure_menu_item( $menu_id, 'Testimonial', home_url( '/#reviews' ) );
+	$desired_items['Contact Us'] = d4w_ensure_menu_item( $menu_id, 'Contact Us', d4w_page_url( 'contact' ) );
 
 	if ( ! $products_id ) {
 		return;
@@ -629,7 +635,14 @@ function d4w_upgrade_primary_menu( $menu_id ) {
 	}
 
 	$items       = wp_get_nav_menu_items( $menu_id );
-	$desired     = array( 'Home', 'About', 'Services', 'Products', 'Work', 'Pricing', 'Journal', 'Contact' );
+	$desired_ids = array_values( array_filter( array_map( 'intval', $desired_items ) ) );
+	foreach ( $items ?: array() as $item ) {
+		if ( 0 === (int) $item->menu_item_parent && ! in_array( (int) $item->ID, $desired_ids, true ) ) {
+			wp_delete_post( $item->ID, true );
+		}
+	}
+
+	$items       = wp_get_nav_menu_items( $menu_id );
 	$product_nav = array();
 	foreach ( $items ?: array() as $item ) {
 		if ( 'd4w_product' === $item->object && (int) $item->menu_item_parent === $products_id ) {
@@ -645,20 +658,17 @@ function d4w_upgrade_primary_menu( $menu_id ) {
 
 	$position = 1;
 	$placed   = array();
-	foreach ( $desired as $title ) {
-		foreach ( $items ?: array() as $item ) {
-			if ( (int) $item->menu_item_parent || 0 !== strcasecmp( wp_specialchars_decode( $item->title, ENT_QUOTES ), $title ) ) {
-				continue;
+	foreach ( $desired_items as $title => $item_id ) {
+		if ( ! $item_id ) {
+			continue;
+		}
+		wp_update_post( array( 'ID' => $item_id, 'menu_order' => $position++ ) );
+		$placed[] = (int) $item_id;
+		if ( 'Products' === $title ) {
+			foreach ( $product_nav as $product_item ) {
+				wp_update_post( array( 'ID' => $product_item->ID, 'menu_order' => $position++ ) );
+				$placed[] = (int) $product_item->ID;
 			}
-			wp_update_post( array( 'ID' => $item->ID, 'menu_order' => $position++ ) );
-			$placed[] = (int) $item->ID;
-			if ( 'Products' === $title ) {
-				foreach ( $product_nav as $product_item ) {
-					wp_update_post( array( 'ID' => $product_item->ID, 'menu_order' => $position++ ) );
-					$placed[] = (int) $product_item->ID;
-				}
-			}
-			break;
 		}
 	}
 	foreach ( $items ?: array() as $item ) {
@@ -724,10 +734,9 @@ function d4w_upgrade_site_structure() {
 						array( 'About', $about_id ? get_permalink( $about_id ) : home_url( '/about/' ) ),
 						array( 'Services', get_post_type_archive_link( 'd4w_service' ) ?: home_url( '/services/' ) ),
 						array( 'Products', get_post_type_archive_link( 'd4w_product' ) ?: home_url( '/products/' ) ),
-						array( 'Work', get_post_type_archive_link( 'd4w_project' ) ?: home_url( '/work/' ) ),
-						array( 'Pricing', $pricing_id ? get_permalink( $pricing_id ) : home_url( '/pricing/' ) ),
-					array( 'Journal', $blog_id ? get_permalink( $blog_id ) : home_url( '/journal/' ) ),
-					array( 'Contact', $contact_id ? get_permalink( $contact_id ) : home_url( '/contact/' ) ),
+						array( 'Clients', get_post_type_archive_link( 'd4w_project' ) ?: home_url( '/work/' ) ),
+						array( 'Testimonial', home_url( '/#reviews' ) ),
+						array( 'Contact Us', $contact_id ? get_permalink( $contact_id ) : home_url( '/contact/' ) ),
 				);
 				foreach ( $items as $item ) {
 					wp_update_nav_menu_item( $menu_id, 0, array( 'menu-item-title' => $item[0], 'menu-item-url' => $item[1], 'menu-item-status' => 'publish', 'menu-item-type' => 'custom' ) );

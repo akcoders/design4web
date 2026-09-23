@@ -1,10 +1,10 @@
 # Design4Web Studio
 
-A custom, multipage, motion-first WordPress theme built for Design4web. Version 3.2.1 adds a logo-led, colour-harmonized header and footer while retaining the responsive full-text review cards, optional live Google Maps review connection and motion-rich agency experience.
+A custom, multipage, motion-first WordPress theme built for Design4web. Version 3.3 introduces a premium, image-led Clients archive, the approved simplified navigation and smoother native scrolling while retaining the logo-led header/footer and live Google review option.
 
 ## Install or update
 
-The ready-to-upload release is `design4web-studio-3.2.1.zip`.
+The ready-to-upload release is `design4web-studio-3.3.0.zip`.
 
 1. Download the ZIP without extracting it.
 2. Open **WordPress Admin → Appearance → Themes → Add New → Upload Theme**.
@@ -14,7 +14,7 @@ The ready-to-upload release is `design4web-studio-3.2.1.zip`.
 6. Visit the homepage or WordPress dashboard once so the safe content migration can complete.
 7. Open **Appearance → Design4web Options** for the editing dashboard.
 
-The theme safely creates Home, About, Services, Products, Work, Pricing, Journal and Contact destinations where needed. The v3 migration seeds missing service/product/pricing/social starter content, preserves existing posts and user-edited records, and adds the six product pages below Products in the primary menu.
+The theme safely creates Home, About, Services, Products, Work, Pricing, Journal and Contact destinations where needed. The v3 migration seeds missing service/product/pricing/social starter content, preserves existing posts and user-edited records, and adds the six product pages below Products. The primary navigation is maintained as Home, About, Services, Products, Clients, Testimonial and Contact Us; Products keeps its dynamic dropdown while Clients opens the Work archive and Testimonial jumps to the homepage review collection.
 
 ## Dynamic admin content
 
@@ -40,14 +40,14 @@ Global colors, section copy, statistics, Google review/profile URL, map embed UR
 - Services archive and dynamic service detail pages
 - Products archive and six dynamic product detail pages
 - Creative pricing page with an editable plan-mode toggle
-- Responsive editorial Work archive with dynamic filters, progressive loading and case studies
+- Responsive, image-led Clients/Work archive with dynamic filters, progressive loading and case studies
 - Journal archive and article pages
 - Contact and FAQ page
 - Standard page, archive, search/404 and comment templates
 
 ## Motion system
 
-The original motion layer includes a preloader, page transitions, split-word reveals, staggered card entrances, image curtains, product orbits/pulses/tickers, an animated footer marquee, expandable service rows, project filtering, parallax, counters, pointer spotlights, magnetic/ripple buttons, custom cursor, testimonial controls and rich hover/focus states. The header and footer use the logo's lime/green family over a charcoal base, with matching navigation indicators, glass effects, CTA shines and ambient footer rings; the uploaded logo artwork itself is not recoloured.
+The original motion layer includes a preloader, page transitions, split-word reveals, staggered card entrances, image curtains, product orbits/pulses/tickers, an animated footer marquee, expandable service rows, project filtering, parallax, counters, pointer spotlights, magnetic/ripple buttons, custom cursor, testimonial controls and rich hover/focus states. Same-page navigation uses native smooth scrolling, passive scroll handling and cached animation targets for a more consistent feel. The header and footer use the logo's lime/green family over a charcoal base, with matching navigation indicators, glass effects, CTA shines and ambient footer rings; the uploaded logo artwork itself is not recoloured.
 
 Under **Brand & Motion**, administrators can independently control:
 

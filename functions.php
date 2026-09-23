@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'D4W_VERSION', '3.2.1' );
+define( 'D4W_VERSION', '3.3.0' );
 define( 'D4W_DIR', get_template_directory() );
 define( 'D4W_URI', get_template_directory_uri() );
 
@@ -351,14 +351,22 @@ add_action( 'save_post', 'd4w_save_meta' );
 
 function d4w_primary_menu_fallback( $args = null ) {
 	$items = array(
-		__( 'Home', 'design4web' )     => home_url( '/' ),
-		__( 'About', 'design4web' )    => d4w_page_url( 'about' ),
-		__( 'Services', 'design4web' ) => get_post_type_archive_link( 'd4w_service' ) ?: home_url( '/services/' ),
-		__( 'Products', 'design4web' ) => get_post_type_archive_link( 'd4w_product' ) ?: home_url( '/products/' ),
-		__( 'Work', 'design4web' )     => get_post_type_archive_link( 'd4w_project' ) ?: home_url( '/work/' ),
-		__( 'Pricing', 'design4web' )  => d4w_page_url( 'pricing' ),
-		__( 'Journal', 'design4web' )  => d4w_page_url( 'journal' ),
-		__( 'Contact', 'design4web' )  => d4w_page_url( 'contact' ),
+		__( 'Home', 'design4web' )        => home_url( '/' ),
+		__( 'About', 'design4web' )       => d4w_page_url( 'about' ),
+		__( 'Services', 'design4web' )    => get_post_type_archive_link( 'd4w_service' ) ?: home_url( '/services/' ),
+		__( 'Products', 'design4web' )    => get_post_type_archive_link( 'd4w_product' ) ?: home_url( '/products/' ),
+		__( 'Clients', 'design4web' )     => get_post_type_archive_link( 'd4w_project' ) ?: home_url( '/work/' ),
+		__( 'Testimonial', 'design4web' ) => home_url( '/#reviews' ),
+		__( 'Contact Us', 'design4web' )  => d4w_page_url( 'contact' ),
+	);
+	$products = get_posts(
+		array(
+			'post_type'      => 'd4w_product',
+			'post_status'    => 'publish',
+			'posts_per_page' => -1,
+			'orderby'        => array( 'menu_order' => 'ASC', 'date' => 'ASC' ),
+			'no_found_rows'  => true,
+		)
 	);
 	$menu_class = 'navbar-nav flex-row align-items-center';
 	if ( is_object( $args ) && ! empty( $args->menu_class ) ) {
@@ -368,10 +376,52 @@ function d4w_primary_menu_fallback( $args = null ) {
 	}
 	echo '<ul class="' . esc_attr( $menu_class ) . '">';
 	foreach ( $items as $label => $url ) {
-		echo '<li class="menu-item"><a href="' . esc_url( $url ) . '">' . esc_html( $label ) . '</a></li>';
+		$is_products = __( 'Products', 'design4web' ) === $label && $products;
+		echo '<li class="menu-item' . ( $is_products ? ' menu-item-has-children' : '' ) . '"><a href="' . esc_url( $url ) . '">' . esc_html( $label ) . '</a>';
+		if ( $is_products ) {
+			echo '<ul class="sub-menu">';
+			foreach ( $products as $product ) {
+				$icon    = get_post_meta( $product->ID, '_d4w_product_icon', true ) ?: 'bi-box';
+				$summary = d4w_card_excerpt( $product->ID, 7 );
+				echo '<li class="menu-item"><a href="' . esc_url( get_permalink( $product ) ) . '"><span class="d4w-product-menu-icon"><i class="bi ' . esc_attr( $icon ) . '"></i></span><span class="d4w-product-menu-copy"><strong>' . esc_html( get_the_title( $product ) ) . '</strong><small>' . esc_html( $summary ) . '</small></span></a></li>';
+			}
+			echo '</ul>';
+		}
+		echo '</li>';
 	}
 	echo '</ul>';
 }
+
+/**
+ * A same-page review anchor is not the homepage itself. Prevent WordPress from
+ * marking both Home and Testimonial as current before the visitor reaches it.
+ *
+ * @param string[] $classes Menu item classes.
+ * @param WP_Post  $item    Menu item object.
+ * @return string[]
+ */
+function d4w_anchor_menu_classes( $classes, $item ) {
+	if ( 'reviews' === wp_parse_url( $item->url, PHP_URL_FRAGMENT ) ) {
+		$classes = array_values( array_diff( $classes, array( 'current-menu-item', 'current_page_item', 'menu-item-home' ) ) );
+	}
+	return $classes;
+}
+add_filter( 'nav_menu_css_class', 'd4w_anchor_menu_classes', 10, 2 );
+
+/**
+ * Remove the inaccurate aria-current value from the homepage review anchor.
+ *
+ * @param array<string,string> $atts Menu link attributes.
+ * @param WP_Post              $item Menu item object.
+ * @return array<string,string>
+ */
+function d4w_anchor_menu_attributes( $atts, $item ) {
+	if ( 'reviews' === wp_parse_url( $item->url, PHP_URL_FRAGMENT ) ) {
+		unset( $atts['aria-current'] );
+	}
+	return $atts;
+}
+add_filter( 'nav_menu_link_attributes', 'd4w_anchor_menu_attributes', 10, 2 );
 
 function d4w_excerpt_length() {
 	return 22;
