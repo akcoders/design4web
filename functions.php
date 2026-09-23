@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'D4W_VERSION', '3.3.0' );
+define( 'D4W_VERSION', '3.4.0' );
 define( 'D4W_DIR', get_template_directory() );
 define( 'D4W_URI', get_template_directory_uri() );
 
@@ -140,10 +140,13 @@ function d4w_register_content_types() {
 		'd4w_project',
 		array(
 			'labels' => array(
-				'name'          => __( 'Projects', 'design4web' ),
-				'singular_name' => __( 'Project', 'design4web' ),
-				'add_new_item'  => __( 'Add New Project', 'design4web' ),
-				'edit_item'     => __( 'Edit Project', 'design4web' ),
+				'name'          => __( 'Clients', 'design4web' ),
+				'singular_name' => __( 'Client Project', 'design4web' ),
+				'menu_name'     => __( 'Clients', 'design4web' ),
+				'all_items'     => __( 'All Client Projects', 'design4web' ),
+				'archives'      => __( 'Client Portfolio', 'design4web' ),
+				'add_new_item'  => __( 'Add New Client Project', 'design4web' ),
+				'edit_item'     => __( 'Edit Client Project', 'design4web' ),
 			),
 			'public'       => true,
 			'menu_icon'    => 'dashicons-portfolio',

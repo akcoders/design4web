@@ -1,10 +1,10 @@
 # Design4Web Studio
 
-A custom, multipage, motion-first WordPress theme built for Design4web. Version 3.3 introduces a premium, image-led Clients archive, the approved simplified navigation and smoother native scrolling while retaining the logo-led header/footer and live Google review option.
+A custom, multipage, motion-first WordPress theme built for Design4web. Version 3.4 rebuilds the Clients archive as a reference-faithful, image-led portfolio with an equal two-column desktop feed, a single-column mobile feed and clean image-zoom interactions while retaining the logo-led header/footer and live Google review option.
 
 ## Install or update
 
-The ready-to-upload release is `design4web-studio-3.3.0.zip`.
+The ready-to-upload release is `design4web-studio-3.4.0.zip`.
 
 1. Download the ZIP without extracting it.
 2. Open **WordPress Admin → Appearance → Themes → Add New → Upload Theme**.
@@ -21,7 +21,7 @@ The theme safely creates Home, About, Services, Products, Work, Pricing, Journal
 - **Services** — content, excerpt, icon, label, duration, qualifier, deliverables, image and display order.
 - **Products** — title, copy, icon, kicker, benefits, workflow, accent, disclaimer and display order.
 - **Pricing Plans** — monthly/project labels, supporting notes, badge, feature list, CTA and featured state.
-- **Projects** — case-study copy, project types, client, period, industry, services, challenge, outcome, results, optional URL, image and display order.
+- **Clients** — case-study copy, project types, client, period, industry, services, challenge, outcome, results, optional URL, image and display order.
 - **Testimonials** — quote, client, company/role, rating, source, original-review URL, photo and order; these remain the fallback when Google is not configured or unavailable.
 - **Testimonials → Google Reviews** — connect a Google Maps browser API key and Business Place ID to show current original Google reviews.
 - **Social Feed** — Instagram/social URL, platform, handle, caption, thumbnail and order.
@@ -40,14 +40,14 @@ Global colors, section copy, statistics, Google review/profile URL, map embed UR
 - Services archive and dynamic service detail pages
 - Products archive and six dynamic product detail pages
 - Creative pricing page with an editable plan-mode toggle
-- Responsive, image-led Clients/Work archive with dynamic filters, progressive loading and case studies
+- Responsive, image-led Clients/Work archive with a two-column desktop feed, a single-column mobile feed and dynamic case studies
 - Journal archive and article pages
 - Contact and FAQ page
 - Standard page, archive, search/404 and comment templates
 
 ## Motion system
 
-The original motion layer includes a preloader, page transitions, split-word reveals, staggered card entrances, image curtains, product orbits/pulses/tickers, an animated footer marquee, expandable service rows, project filtering, parallax, counters, pointer spotlights, magnetic/ripple buttons, custom cursor, testimonial controls and rich hover/focus states. Same-page navigation uses native smooth scrolling, passive scroll handling and cached animation targets for a more consistent feel. The header and footer use the logo's lime/green family over a charcoal base, with matching navigation indicators, glass effects, CTA shines and ambient footer rings; the uploaded logo artwork itself is not recoloured.
+The original motion layer includes a preloader, page transitions, split-word reveals, staggered card entrances, image curtains, portfolio image zooms, product orbits/pulses/tickers, an animated footer marquee, expandable service rows, parallax, counters, pointer spotlights, magnetic/ripple buttons, custom cursor, testimonial controls and rich hover/focus states. Same-page navigation uses native smooth scrolling, passive scroll handling and cached animation targets for a more consistent feel. The header and footer use the logo's lime/green family over a charcoal base, with matching navigation indicators, glass effects, CTA shines and ambient footer rings; the uploaded logo artwork itself is not recoloured.
 
 Under **Brand & Motion**, administrators can independently control:
 
