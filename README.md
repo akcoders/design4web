@@ -1,10 +1,10 @@
 # Design4Web Studio
 
-A custom, multipage, motion-first WordPress theme built for Design4web. Version 3.5 refreshes the Clients collection with 19 verified recent projects, locally bundled website previews, an equal two-column desktop feed, a single-column mobile feed and clean image-zoom interactions while retaining the logo-led header/footer and live Google review option.
+A custom, multipage, motion-first WordPress theme built for Design4web. Version 3.5.1 keeps the homepage Work collection visually consistent with the Clients page, using a two-column desktop feed, a single-column mobile feed and uncropped full website previews. Case-study previews now use the same full-image treatment while retaining the logo-led header/footer and live Google review option.
 
 ## Install or update
 
-The ready-to-upload release is `design4web-studio-3.5.0.zip`.
+The ready-to-upload release is `design4web-studio-3.5.1.zip`.
 
 1. Download the ZIP without extracting it.
 2. Open **WordPress Admin → Appearance → Themes → Add New → Upload Theme**.

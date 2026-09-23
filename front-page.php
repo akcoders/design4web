@@ -147,37 +147,32 @@ $image_dir = D4W_URI . '/assets/images/';
 <?php endif; ?>
 
 <?php if ( d4w_get_option( 'show_projects', true ) ) : ?>
-<section id="work" class="d4w-work section-space">
-	<div class="container-fluid d4w-shell">
-		<div class="row align-items-end mb-5 g-4">
-			<div class="col-lg-4"><p class="d4w-section-label reveal-up"><span>Work</span><?php esc_html_e( 'Our work', 'design4web' ); ?></p></div>
-			<div class="col-lg-6"><h2 class="d4w-display reveal-text"><?php echo esc_html( d4w_get_option( 'work_title' ) ); ?></h2></div>
-			<div class="col-lg-2 text-lg-end"><a class="d4w-text-link reveal-up" href="<?php echo esc_url( get_post_type_archive_link( 'd4w_project' ) ); ?>"><?php esc_html_e( 'View all work', 'design4web' ); ?><i class="bi bi-arrow-right"></i></a></div>
-		</div>
+	<section id="work" class="d4w-work d4w-clients-archive d4w-home-work section-space">
+		<div class="container-fluid d4w-shell">
+			<div class="row align-items-end mb-5 g-4">
+				<div class="col-lg-4"><p class="d4w-section-label d4w-section-label--light reveal-up"><span>Work</span><?php esc_html_e( 'Our work', 'design4web' ); ?></p></div>
+				<div class="col-lg-6"><h2 class="d4w-display text-white reveal-text"><?php echo esc_html( d4w_get_option( 'work_title' ) ); ?></h2></div>
+				<div class="col-lg-2 text-lg-end"><a class="d4w-text-link d4w-text-link--light reveal-up" href="<?php echo esc_url( get_post_type_archive_link( 'd4w_project' ) ); ?>"><?php esc_html_e( 'View all work', 'design4web' ); ?><i class="bi bi-arrow-right"></i></a></div>
+			</div>
 
-		<div class="row g-4 d4w-project-grid">
-			<?php
-			$project_query = new WP_Query( array( 'post_type' => 'd4w_project', 'posts_per_page' => 5, 'orderby' => array( 'menu_order' => 'ASC', 'date' => 'DESC' ), 'no_found_rows' => true ) );
-			$project_index = 0;
-			while ( $project_query->have_posts() ) :
-				$project_query->the_post();
-				++$project_index;
-				$image    = d4w_feature_image_url( get_the_ID(), 'project-' . min( $project_index, 5 ) . '.jpg', 'd4w-project' );
-				$terms    = get_the_terms( get_the_ID(), 'd4w_project_type' );
-				$category = $terms && ! is_wp_error( $terms ) ? $terms[0]->name : __( 'Digital Experience', 'design4web' );
-				$layout   = 1 === $project_index || 4 === $project_index ? 'col-lg-7' : 'col-lg-5';
-				?>
-				<div class="<?php echo esc_attr( $layout ); ?>">
-					<article class="d4w-project-card reveal-up <?php echo 2 === $project_index || 4 === $project_index ? 'd4w-project-card--tall' : ''; ?>">
-						<a href="<?php the_permalink(); ?>" class="d4w-project-media">
-							<img src="<?php echo esc_url( $image ); ?>" alt="<?php echo esc_attr( get_the_title() ); ?>" width="900" height="1080" loading="lazy">
-							<span class="d4w-project-view"><i class="bi bi-arrow-up-right"></i></span>
+			<div class="d4w-work-gallery d4w-home-work__grid">
+				<?php
+				$project_query = new WP_Query( array( 'post_type' => 'd4w_project', 'posts_per_page' => 6, 'orderby' => array( 'menu_order' => 'ASC', 'date' => 'DESC' ), 'no_found_rows' => true ) );
+				$project_index = 0;
+				while ( $project_query->have_posts() ) :
+					$project_query->the_post();
+					++$project_index;
+					$image   = d4w_feature_image_url( get_the_ID(), 'project-' . min( $project_index, 5 ) . '.jpg', 'full' );
+					$summary = d4w_card_excerpt( get_the_ID(), 12 );
+					?>
+					<article class="d4w-work-card d4w-client-card reveal-up">
+						<a class="d4w-client-card__link" href="<?php the_permalink(); ?>" data-cursor-label="VIEW" aria-label="<?php echo esc_attr( sprintf( __( 'View %s case study', 'design4web' ), get_the_title() ) ); ?>">
+							<figure class="d4w-client-card__media"><img src="<?php echo esc_url( $image ); ?>" alt="<?php echo esc_attr( get_the_title() ); ?>" width="1200" height="675" loading="lazy"></figure>
+							<div class="d4w-client-card__copy"><h3><?php the_title(); ?></h3><?php if ( $summary ) : ?><p><?php echo esc_html( $summary ); ?></p><?php endif; ?></div>
 						</a>
-						<div class="d4w-project-copy"><div><p><?php echo esc_html( $category ); ?></p><h3><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3></div><span><?php echo esc_html( get_post_meta( get_the_ID(), '_d4w_year', true ) ?: wp_date( 'Y' ) ); ?></span></div>
 					</article>
-				</div>
-			<?php endwhile; wp_reset_postdata(); ?>
-		</div>
+				<?php endwhile; wp_reset_postdata(); ?>
+			</div>
 	</div>
 </section>
 <?php endif; ?>
@@ -198,7 +193,7 @@ $case_query = new WP_Query(
 if ( $case_query->have_posts() ) : ?>
 <section class="d4w-home-cases section-space-sm">
 	<div class="container-fluid d4w-shell"><div class="row align-items-end mb-5 g-4"><div class="col-lg-4"><p class="d4w-section-label d4w-section-label--light reveal-up"><span>Cases</span><?php esc_html_e( 'Case studies', 'design4web' ); ?></p></div><div class="col-lg-6"><h2 class="d4w-display text-white reveal-text"><?php echo esc_html( d4w_get_option( 'case_studies_title' ) ); ?></h2></div><div class="col-lg-2 text-lg-end"><a class="d4w-text-link d4w-text-link--light reveal-up" href="<?php echo esc_url( get_post_type_archive_link( 'd4w_project' ) ); ?>"><?php esc_html_e( 'Read all cases', 'design4web' ); ?><i class="bi bi-arrow-right"></i></a></div></div><div class="d4w-case-strip">
-	<?php while ( $case_query->have_posts() ) : $case_query->the_post(); $case_image = d4w_feature_image_url( get_the_ID(), 'project-' . ( $case_query->current_post + 1 ) . '.jpg', 'd4w-project' ); $case_terms = get_the_terms( get_the_ID(), 'd4w_project_type' ); ?><article class="d4w-home-case reveal-up"><a class="d4w-home-case__media d4w-image-curtain" href="<?php the_permalink(); ?>"><img src="<?php echo esc_url( $case_image ); ?>" alt="<?php echo esc_attr( get_the_title() ); ?>" loading="lazy"><span><?php echo esc_html( str_pad( (string) ( $case_query->current_post + 1 ), 2, '0', STR_PAD_LEFT ) ); ?></span></a><div class="d4w-home-case__copy"><p><?php echo esc_html( $case_terms && ! is_wp_error( $case_terms ) ? $case_terms[0]->name : __( 'Digital case study', 'design4web' ) ); ?></p><h3><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3><div><?php echo esc_html( d4w_card_excerpt( get_the_ID(), 24 ) ); ?></div><a class="d4w-text-link d4w-text-link--light" href="<?php the_permalink(); ?>"><?php esc_html_e( 'Open case study', 'design4web' ); ?><i class="bi bi-arrow-up-right"></i></a></div></article><?php endwhile; wp_reset_postdata(); ?>
+	<?php while ( $case_query->have_posts() ) : $case_query->the_post(); $case_image = d4w_feature_image_url( get_the_ID(), 'project-' . ( $case_query->current_post + 1 ) . '.jpg', 'full' ); $case_terms = get_the_terms( get_the_ID(), 'd4w_project_type' ); ?><article class="d4w-home-case reveal-up"><a class="d4w-home-case__media d4w-image-curtain" href="<?php the_permalink(); ?>"><img src="<?php echo esc_url( $case_image ); ?>" alt="<?php echo esc_attr( get_the_title() ); ?>" loading="lazy"><span><?php echo esc_html( str_pad( (string) ( $case_query->current_post + 1 ), 2, '0', STR_PAD_LEFT ) ); ?></span></a><div class="d4w-home-case__copy"><p><?php echo esc_html( $case_terms && ! is_wp_error( $case_terms ) ? $case_terms[0]->name : __( 'Digital case study', 'design4web' ) ); ?></p><h3><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3><div><?php echo esc_html( d4w_card_excerpt( get_the_ID(), 24 ) ); ?></div><a class="d4w-text-link d4w-text-link--light" href="<?php the_permalink(); ?>"><?php esc_html_e( 'Open case study', 'design4web' ); ?><i class="bi bi-arrow-up-right"></i></a></div></article><?php endwhile; wp_reset_postdata(); ?>
 	</div></div>
 </section>
 <?php endif; endif; ?>
