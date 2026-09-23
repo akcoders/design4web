@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'D4W_SCHEMA_VERSION', '3.3.0' );
+define( 'D4W_SCHEMA_VERSION', '3.5.0' );
 
 /**
  * Find seeded content without relying on WP_Query's title handling. Titles
@@ -210,118 +210,190 @@ function d4w_upgrade_services() {
 }
 
 /**
- * Migrate the verified, client-owned legacy portfolio into editable projects.
- * Bundled images are local fallbacks and are replaced automatically when an
- * editor assigns a featured image.
+ * Add a bundled project preview to the Media Library and set it as featured.
+ * The theme image remains a reliable fallback if the uploads directory cannot
+ * be written during deployment.
+ *
+ * @param int    $post_id  Project post ID.
+ * @param string $filename Bundled image filename.
+ * @param string $title    Attachment title.
+ * @return int Attachment ID or zero.
+ */
+function d4w_attach_project_preview( $post_id, $filename, $title ) {
+	$source = D4W_DIR . '/assets/images/clients/' . basename( $filename );
+	if ( ! file_exists( $source ) || ! is_readable( $source ) ) {
+		return 0;
+	}
+
+	$bits = wp_upload_bits( basename( $filename ), null, file_get_contents( $source ) );
+	if ( ! empty( $bits['error'] ) ) {
+		return 0;
+	}
+
+	$attachment_id = wp_insert_attachment(
+		array(
+			'post_mime_type' => 'image/jpeg',
+			'post_title'     => $title . ' website preview',
+			'post_status'    => 'inherit',
+		),
+		$bits['file'],
+		$post_id,
+		true
+	);
+	if ( is_wp_error( $attachment_id ) ) {
+		return 0;
+	}
+
+	require_once ABSPATH . 'wp-admin/includes/image.php';
+	$metadata = wp_generate_attachment_metadata( $attachment_id, $bits['file'] );
+	if ( $metadata ) {
+		wp_update_attachment_metadata( $attachment_id, $metadata );
+	}
+	update_post_meta( $attachment_id, '_wp_attachment_image_alt', $title . ' website' );
+	set_post_thumbnail( $post_id, $attachment_id );
+	return (int) $attachment_id;
+}
+
+/**
+ * Replace the previous portfolio with the verified recent-work collection.
+ * New records are prepared first; old projects are removed only after every
+ * replacement record has been created successfully.
+ *
+ * @return bool Whether the replacement completed successfully.
  */
 function d4w_upgrade_projects() {
+	$dataset_version = '3.5.0';
+	if ( $dataset_version === get_option( 'd4w_recent_projects_version' ) ) {
+		return true;
+	}
+
+	$lock_name = 'd4w_recent_projects_migration_lock';
+	$lock_time = (int) get_option( $lock_name, 0 );
+	if ( $lock_time && ( time() - $lock_time ) < 600 ) {
+		return false;
+	}
+	if ( $lock_time ) {
+		delete_option( $lock_name );
+	}
+	if ( ! add_option( $lock_name, time(), '', false ) ) {
+		return false;
+	}
+
 	$projects = array(
-		array( 'Ayurveda', 'ayurveda', 'ayurveda.jpg', 'http://www.ayurvedatodayworld.com', 'Web Hosting, Logo Design, Web Page Design', 'Ayurvedic Industry · Ayurvedic Medicine', array( 'Web Design', 'Brand Identity', 'Hosting' ) ),
-		array( 'WhatsAppIndia', 'whatsappindia', 'whatsapp.jpg', 'http://whatsappindia.com', 'Web Hosting, Logo Design, Web Page Design, WordPress Integration', 'Video · Video Blog', array( 'Web Design', 'WordPress', 'Brand Identity' ) ),
-		array( 'Screentex', 'screentex', 'screentex.jpg', 'http://www.screentex.in', 'Web Hosting, Logo Design, Web Page Design', 'Publishing · Screen, Digital & Textile Printing', array( 'Web Design', 'Brand Identity', 'Hosting' ) ),
-		array( 'H-Link', 'h-link', 'hlink.jpg', 'http://h-link.in', 'Web Hosting, Logo Design, Web Page Design, HTML', 'Furniture & Fittings · S.S. Door Handles', array( 'Web Design', 'Brand Identity', 'Hosting' ) ),
-		array( 'Fit-N-Fair', 'fit-n-fair', 'fitnfair.jpg', 'http://www.fitnfair.com', 'Web Hosting, Logo Design, Web Page Design', 'Slimming · Beauty & Wellness', array( 'Web Design', 'Brand Identity', 'Hosting' ) ),
-		array( 'PSS Contractors', 'pss-contractors', 'pss.jpg', '', 'Web Hosting, Logo Design, Web Page Design', 'Manpower Consultancy', array( 'Web Design', 'Brand Identity', 'Hosting' ) ),
-		array( 'Satyam Jewellers', 'satyam-jewellers', 'satyam.jpg', '', 'Logo Design, Web Page Design, Front-end Development', 'Imitation Jewellery · Earrings · Bracelets · Pendants', array( 'Web Design', 'Brand Identity' ) ),
-		array( 'Ashtabhrahma', 'ashtabhrahma', 'ashtha.jpg', 'http://ashtabhrahma.org', 'Web Hosting, Logo Design, Web Page Design, HTML', 'Brahmin Community Organisation', array( 'Web Design', 'Brand Identity', 'Hosting' ) ),
-		array( 'Times Club', 'times-club', 'times_club.jpg', '', 'Logo Design, Web Page Design, Front-end Development', 'Club & Resort', array( 'Web Design', 'Brand Identity' ) ),
-		array( 'Jodi Milao', 'jodi-milao', 'jodimilao.jpg', '', 'Logo Design, Web Page Design, HTML', 'Matrimonial · Marriage Bureau', array( 'Web Design', 'Brand Identity' ) ),
-		array( 'Crescent Moon', 'crescent-moon', 'crescent.jpg', 'http://crescentmoon.in', 'Logo Design, Web Page Design, Front-end Development', 'Exhibition Organiser', array( 'Web Design', 'Brand Identity' ) ),
-		array( 'Neha Shyam', 'neha-shyam', 'neha.jpg', 'http://nehashyam.com', 'Logo Design, Web Page Design, HTML', 'Personal Portfolio', array( 'Web Design', 'Brand Identity' ) ),
-		array( 'Trader Shipping', 'trader-shipping', 'tsp.jpg', 'http://tradershippingindia.com/', 'Logo Design, Web Page Design, Front-end Development', 'Multimodal Transport · Freight & Logistics', array( 'Web Design', 'Brand Identity' ) ),
-		array( 'Arc Tech', 'arc-tech', 'arctec.jpg', 'http://www.arctecinteriors.com/', 'Logo Animation, Web Page Design, Front-end Development', 'Interior Design · Contracting · Project Coordination', array( 'Web Design', 'Brand Identity' ) ),
-		array( 'SKJ', 'skj', 'skj.jpg', 'http://www.skj.in', 'Logo Design, Web Page Design, HTML5', 'Camera Solutions · IP Solutions', array( 'Web Design', 'Brand Identity' ) ),
-		array( 'J-Link', 'j-link', 'jlink.jpg', 'http://www.j-link.in', 'Web Hosting, Logo Design, Web Page Design, HTML', 'Furniture & Fittings · S.S. Door Handles', array( 'Web Design', 'Brand Identity', 'Hosting' ) ),
+		array( 'AndBeyond.Media', 'and-beyond-media', 'and-beyond-media.jpg', 'https://andbeyond.media/', 'AdTech & Programmatic Advertising', 'Website design, responsive development, content architecture', array( 'Web Design', 'AdTech' ), 'An image-led corporate platform presenting programmatic advertising, monetisation tools and publisher-focused ad technology.', 'Organise a technically detailed advertising offer into a confident website that works for publishers, brands and partners.' ),
+		array( 'Madhya Pradesh State Rifle Association', 'mpsra', 'mpsra.jpg', 'https://mpsra.org.in/', 'Sports Association', 'Website design, WordPress development, information architecture', array( 'Web Design', 'Sports' ), 'A responsive association website connecting athletes with shooting events, training information and organisational updates.', 'Make competitions, notices, training pathways and association information easy to discover across devices.' ),
+		array( 'HospyKare', 'hospykare', 'hospykare.jpg', 'https://www.hospykare.com/', 'Healthcare & Medical Travel', 'Website design, responsive development, conversion journeys', array( 'Web Design', 'Healthcare' ), 'A healthcare platform presenting medical travel assistance, hospital access and coordinated patient-support services.', 'Build clarity and trust around a multi-step healthcare journey for patients seeking dependable treatment support.' ),
+		array( 'Langwarrin Health Clinic', 'langwarrin-health-clinic', 'langwarrin-health-clinic.jpg', 'https://langwarrinhealthclinic.com/', 'Primary Healthcare', 'Website design, WordPress development, appointment journeys', array( 'Web Design', 'Healthcare' ), 'A patient-friendly clinic website for doctors, services, billing information, opening hours and appointment access.', 'Help local patients quickly find care information and the right path to contact or book with the clinic.' ),
+		array( 'Armet Industries', 'armet-industries', 'armet-industries.jpg', 'https://armetindustries.com/', 'Smart Automation', 'Website design, product presentation, responsive development', array( 'Web Design', 'Automation' ), 'A polished product website for smart touch switches, home automation and hospitality automation solutions.', 'Present a modern automation portfolio with enough visual impact to match the quality of the physical products.' ),
+		array( 'Blinq Photo', 'blinq-photo', 'blinq-photo.jpg', 'https://blinqphoto.in/', 'Photography', 'Portfolio design, responsive development, visual storytelling', array( 'Web Design', 'Photography' ), 'A cinematic photography portfolio showcasing architecture, interiors, travel imagery and aerial perspectives.', 'Let the imagery lead while keeping project discovery, photographer identity and enquiries effortless.' ),
+		array( 'Smart Sense Technical Services', 'alss-technical-services', 'alss-technical-services.jpg', 'https://alssts.com/', 'Electrical & Technical Services', 'Website design, WordPress development, service architecture', array( 'Web Design', 'Engineering' ), 'A service-led UAE website covering electrical systems, switchgear, MEP, maintenance and safety solutions.', 'Structure a wide technical capability set so customers can quickly identify the relevant engineering service.' ),
+		array( 'Manjra Industries', 'manjra-industries', 'manjra-industries.jpg', 'https://manjraindustries.in/', 'Sugar & Bioenergy', 'Corporate website, responsive development, content structure', array( 'Web Design', 'Industrial' ), 'A corporate platform presenting integrated sugar, distillery and co-generation operations with a sustainability focus.', 'Bring multiple industrial business units together in one coherent, accessible digital identity.' ),
+		array( 'Crown Developers', 'crown-developers', 'crown-developers.jpg', 'https://crowndevelopers.in/', 'Commercial Real Estate', 'Website design, property presentation, responsive development', array( 'Web Design', 'Real Estate' ), 'A real-estate destination positioning commercial spaces as a connected business hub for growth and opportunity.', 'Translate the location, commercial promise and project identity into a persuasive property experience.' ),
+		array( 'Cobra Equipments', 'cobra-equipments', 'cobra-equipments.jpg', 'https://cobraequipments.com/', 'Construction Equipment', 'Corporate website, product presentation, responsive development', array( 'Web Design', 'Industrial' ), 'A robust equipment website presenting loaders and construction machinery through clear product-led journeys.', 'Give a heavy-equipment range a modern, credible digital presence with straightforward product discovery.' ),
+		array( 'Metro Fan', 'metrofan', 'metrofan.jpg', 'https://metrofan.in/', 'Fans & Home Appliances', 'Website design, product catalogue, responsive development', array( 'Web Design', 'Consumer Products' ), 'A product-rich brand website for fans and home appliances, balancing catalogue depth with everyday usability.', 'Modernise an established consumer brand while making product ranges easy to browse on every screen.' ),
+		array( 'Walchand Builders', 'walchand-builders', 'walchand-builders.jpg', 'https://walchandbuilders.in/', 'Real Estate', 'Website design, property presentation, WordPress development', array( 'Web Design', 'Real Estate' ), 'A premium real-estate website presenting developments, project details and the builder’s approach to urban living.', 'Create an aspirational property experience that still keeps project facts and enquiry paths clear.' ),
+		array( 'Shree Varad Homes', 'shree-varad-homes', 'shree-varad-homes.jpg', 'https://shreevaradhomes.com/', 'Residential Real Estate', 'Landing experience, responsive development, lead generation', array( 'Web Design', 'Real Estate' ), 'A focused residential property experience for contemporary 2 and 3 BHK homes in Vasai.', 'Turn a residential project’s key advantages, amenities and location into an inviting lead-generation journey.' ),
+		array( '3SQUARE', '3-square-fittings', '3-square-fittings.jpg', 'https://3squarefittings.com/', 'Furniture Fittings', 'E-commerce design, product catalogue, responsive development', array( 'Web Design', 'E-Commerce' ), 'A product catalogue and commerce experience for furniture feet, bases, handles, knobs, hooks and joinery fittings.', 'Make a varied fittings range visually engaging and simple to explore by category and product.' ),
+		array( 'Earth Diaries by Deepti Sharma', 'deepti-sharma', 'deepti-sharma.jpg', 'https://deeptisharma.co.in/', 'Environment & Publishing', 'Personal brand website, editorial design, responsive development', array( 'Web Design', 'Publishing' ), 'An editorial personal platform for environmental scientist and author Deepti Sharma, bringing books and ecological ideas together.', 'Create a distinctive home for research, writing and environmental storytelling without losing a personal voice.' ),
+		array( 'Dinix Cookware', 'dinix', 'dinix.jpg', 'https://dinix.in/', 'Cookware & E-Commerce', 'E-commerce design, catalogue UX, responsive development', array( 'Web Design', 'E-Commerce' ), 'A modern shopping experience for premium cookware and practical kitchen products organised around everyday discovery.', 'Combine product presentation, category navigation and purchase journeys in a clean mobile-first storefront.' ),
+		array( 'EVO Charge', 'evocharge', 'evocharge.jpg', 'https://evocharge.in/', 'EV Charging Infrastructure', 'Corporate website, responsive development, information architecture', array( 'Web Design', 'Clean Mobility' ), 'A green-mobility platform communicating a nationwide vision for accessible, high-speed electric-vehicle charging.', 'Explain an ambitious infrastructure programme through clear routes, offerings and partnership information.' ),
+		array( 'Shri Ram Kripa', 'sr-kripa', 'sr-kripa.jpg', 'https://srkripa.com/', 'Bags & Manufacturing', 'E-commerce design, product catalogue, responsive development', array( 'Web Design', 'E-Commerce' ), 'A visual catalogue for premium and luxury jewellery bags across art leather, non-woven, jute and specialist ranges.', 'Showcase a broad manufactured-bag collection with strong category discovery and direct enquiry paths.' ),
+		array( 'Essnd Global', 'essnd-global', 'essnd-global.jpg', 'http://essndglobal.com/', 'Healthcare Manufacturing', 'Corporate website, responsive development, product presentation', array( 'Web Design', 'Healthcare' ), 'A healthcare manufacturing website presenting topical, dermatology, cosmetic and personal-care product capabilities.', 'Communicate manufacturing credibility, product breadth and quality-led processes in a clear corporate experience.' ),
 	);
+
+	$old_project_ids = get_posts(
+		array(
+			'post_type'      => 'd4w_project',
+			'post_status'    => 'any',
+			'posts_per_page' => -1,
+			'fields'         => 'ids',
+			'no_found_rows'  => true,
+		)
+	);
+	$new_project_ids = array();
+	$new_media_ids   = array();
 
 	foreach ( $projects as $order => $project ) {
-		$matches = get_posts(
+		$content = '<p>' . esc_html( $project[7] ) . '</p><h2>A focused digital experience</h2><p>' . esc_html( $project[8] ) . '</p><p>The result is a responsive, content-managed website that gives the organisation a clear visual identity and makes its key information easier to explore.</p>';
+		$post_id = wp_insert_post(
 			array(
-				'post_type'      => 'd4w_project',
-				'post_status'    => 'any',
-				'posts_per_page' => 1,
-				'meta_key'       => '_d4w_legacy_key',
-				'meta_value'     => $project[1],
-				'no_found_rows'  => true,
-			)
+				'post_type'    => 'd4w_project',
+				'post_status'  => 'draft',
+				'post_title'   => $project[0],
+				'post_name'    => $project[1],
+				'post_excerpt' => $project[7],
+				'post_content' => $content,
+				'menu_order'   => $order,
+			),
+			true
 		);
-		$post = $matches ? $matches[0] : d4w_find_seeded_post( $project[0], 'd4w_project' );
-		if ( ! $post && 'whatsappindia' === $project[1] ) {
-			$post = get_page_by_path( 'whatsappindia-platform', OBJECT, 'd4w_project' );
+		if ( is_wp_error( $post_id ) ) {
+			foreach ( $new_project_ids as $cleanup_id ) {
+				wp_delete_post( $cleanup_id, true );
+			}
+			foreach ( $new_media_ids as $cleanup_media_id ) {
+				wp_delete_attachment( $cleanup_media_id, true );
+			}
+			delete_option( $lock_name );
+			return false;
 		}
 
-		$excerpt = sprintf( 'A legacy Design4web portfolio project for %1$s, combining %2$s.', $project[0], strtolower( $project[4] ) );
-		$content = sprintf( '<p>This archive project documents Design4web’s work for <strong>%1$s</strong> across %2$s.</p><h2>A clear digital presence for its audience</h2><p>The engagement brought the brand, website presentation and technical delivery into one focused experience. The original visual has been preserved as part of the Design4web portfolio archive.</p>', esc_html( $project[0] ), esc_html( $project[4] ) );
-
-		if ( ! $post ) {
-			$post_id = wp_insert_post(
-				array(
-					'post_type'    => 'd4w_project',
-					'post_status'  => 'publish',
-					'post_title'   => $project[0],
-					'post_name'    => $project[1],
-					'post_excerpt' => $excerpt,
-					'post_content' => $content,
-					'menu_order'   => $order,
-				)
-			);
-		} else {
-			$post_id = $post->ID;
-			$update  = array( 'ID' => $post_id, 'menu_order' => $order );
-			if ( 'WhatsAppIndia Platform' === $post->post_title ) {
-				$update['post_title'] = 'WhatsAppIndia';
-				$update['post_name']  = 'whatsappindia';
-			}
-			if ( ! trim( $post->post_excerpt ) ) {
-				$update['post_excerpt'] = $excerpt;
-			}
-			if ( ! trim( $post->post_content ) ) {
-				$update['post_content'] = $content;
-			}
-			wp_update_post( $update );
-		}
-
-		if ( ! $post_id || is_wp_error( $post_id ) ) {
-			continue;
-		}
+		$new_project_ids[] = (int) $post_id;
 		$meta = array(
-			'_d4w_legacy_key'    => $project[1],
-			'_d4w_bundled_image' => 'legacy/' . $project[2],
-			'_d4w_client'        => $project[0],
-			'_d4w_year'          => 'Archive',
-			'_d4w_services'      => $project[4],
-			'_d4w_industry'      => $project[5],
-			'_d4w_challenge'     => 'Create a distinctive, useful web presence that communicates the organisation’s offer clearly to its intended audience.',
-			'_d4w_outcome'       => 'A branded digital experience that brought identity, information and contact paths together in one coherent destination.',
+			'_d4w_dataset_key'         => $project[1],
+			'_d4w_bundled_image'       => 'clients/' . $project[2],
+			'_d4w_client'              => $project[0],
+			'_d4w_year'                => '2026',
+			'_d4w_url'                 => $project[3],
+			'_d4w_industry'            => $project[4],
+			'_d4w_services'            => $project[5],
+			'_d4w_challenge'           => $project[8],
+			'_d4w_outcome'             => 'A responsive, easy-to-manage digital presence with stronger content hierarchy, visual clarity and direct paths to the organisation’s most important information.',
+			'_d4w_featured_case_study' => $order < 4 ? '1' : '0',
 		);
 		foreach ( $meta as $key => $value ) {
-			if ( $value && ! get_post_meta( $post_id, $key, true ) ) {
-				update_post_meta( $post_id, $key, $value );
-			}
+			update_post_meta( $post_id, $key, $value );
 		}
-		if ( $order < 3 && ! metadata_exists( 'post', $post_id, '_d4w_featured_case_study' ) ) {
-			update_post_meta( $post_id, '_d4w_featured_case_study', '1' );
+		wp_set_object_terms( $post_id, $project[6], 'd4w_project_type', false );
+		$media_id = d4w_attach_project_preview( $post_id, $project[2], $project[0] );
+		if ( $media_id ) {
+			$new_media_ids[] = $media_id;
 		}
-		wp_set_object_terms( $post_id, $project[6], 'd4w_project_type', true );
 	}
 
-	$concepts = array(
-		'Commerce Experience'  => array( 30, 'project-2.jpg', 'Retail & Commerce', 'Commerce strategy, UX, interface design', 'A concept store experience shaped around intuitive product discovery, trust and a low-friction path to checkout.' ),
-		'Growth Campaign'      => array( 31, 'project-3.jpg', 'Digital Marketing', 'Campaign strategy, creative system, landing experience', 'A coordinated campaign concept designed to turn attention into measurable action across digital touchpoints.' ),
-		'Modern Brand System'  => array( 32, 'project-4.jpg', 'Brand Identity', 'Brand strategy, identity design, digital guidelines', 'A flexible identity concept built to remain recognisable across web, social and business communication.' ),
-	);
-	foreach ( $concepts as $title => $concept ) {
-		$post = d4w_find_seeded_post( $title, 'd4w_project' );
-		if ( ! $post || trim( $post->post_content ) ) {
-			continue;
+	foreach ( $new_project_ids as $new_project_id ) {
+		$published = wp_update_post( array( 'ID' => $new_project_id, 'post_status' => 'publish' ), true );
+		if ( is_wp_error( $published ) ) {
+			foreach ( $new_project_ids as $cleanup_id ) {
+				wp_delete_post( $cleanup_id, true );
+			}
+			foreach ( $new_media_ids as $cleanup_media_id ) {
+				wp_delete_attachment( $cleanup_media_id, true );
+			}
+			delete_option( $lock_name );
+			return false;
 		}
-		wp_update_post( array( 'ID' => $post->ID, 'menu_order' => $concept[0], 'post_content' => '<p>' . esc_html( $concept[4] ) . '</p><h2>Designed as a complete system</h2><p>Strategy, visual direction and interaction choices were developed together so the concept could stay consistent as it grows.</p>' ) );
-		update_post_meta( $post->ID, '_d4w_bundled_image', $concept[1] );
-		update_post_meta( $post->ID, '_d4w_industry', $concept[2] );
-		update_post_meta( $post->ID, '_d4w_services', $concept[3] );
-		update_post_meta( $post->ID, '_d4w_challenge', 'Turn a broad business goal into a focused digital direction with a clear visual point of view.' );
-		update_post_meta( $post->ID, '_d4w_outcome', $concept[4] );
 	}
+
+	foreach ( $old_project_ids as $old_project_id ) {
+		$thumbnail_id = get_post_thumbnail_id( $old_project_id );
+		if ( $thumbnail_id && (int) get_post_field( 'post_parent', $thumbnail_id ) === (int) $old_project_id ) {
+			wp_delete_attachment( $thumbnail_id, true );
+		}
+		wp_delete_post( $old_project_id, true );
+	}
+	foreach ( $new_project_ids as $order => $new_project_id ) {
+		wp_update_post(
+			array(
+				'ID'        => $new_project_id,
+				'post_name' => $projects[ $order ][1],
+			)
+		);
+	}
+
+	update_option( 'd4w_recent_projects_version', $dataset_version );
+	delete_option( $lock_name );
+	return true;
 }
 
 /**
@@ -764,7 +836,9 @@ function d4w_run_schema_upgrade() {
 		return;
 	}
 	d4w_upgrade_services();
-	d4w_upgrade_projects();
+	if ( ! d4w_upgrade_projects() ) {
+		return;
+	}
 	d4w_upgrade_products();
 	d4w_upgrade_growth_supporting_content();
 	d4w_upgrade_supporting_content();

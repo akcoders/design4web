@@ -151,7 +151,7 @@ function d4w_feature_image_url( $post_id, $fallback, $size = 'large' ) {
 		}
 	}
 	$bundled = get_post_meta( $post_id, '_d4w_bundled_image', true );
-	if ( $bundled && preg_match( '#^(?:legacy/)?[a-z0-9_-]+\.jpg$#', $bundled ) && file_exists( D4W_DIR . '/assets/images/' . $bundled ) ) {
+	if ( $bundled && preg_match( '#^(?:(?:legacy|clients)/)?[a-z0-9_-]+\.jpg$#', $bundled ) && file_exists( D4W_DIR . '/assets/images/' . $bundled ) ) {
 		return D4W_URI . '/assets/images/' . $bundled;
 	}
 	return D4W_URI . '/assets/images/' . ltrim( $fallback, '/' );

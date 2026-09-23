@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'D4W_VERSION', '3.4.0' );
+define( 'D4W_VERSION', '3.5.0' );
 define( 'D4W_DIR', get_template_directory() );
 define( 'D4W_URI', get_template_directory_uri() );
 
@@ -215,6 +215,16 @@ function d4w_order_public_archives( $query ) {
 }
 add_action( 'pre_get_posts', 'd4w_order_public_archives' );
 
+/**
+ * Keep listing titles clean by removing WordPress's generic title prefix.
+ *
+ * @return string
+ */
+function d4w_remove_listing_title_prefix() {
+	return '';
+}
+add_filter( 'get_the_archive_title_prefix', 'd4w_remove_listing_title_prefix' );
+
 function d4w_add_meta_boxes() {
 	add_meta_box( 'd4w_service_details', __( 'Service Details', 'design4web' ), 'd4w_service_meta_box', 'd4w_service', 'side' );
 	add_meta_box( 'd4w_project_details', __( 'Project Details', 'design4web' ), 'd4w_project_meta_box', 'd4w_project', 'normal' );
@@ -262,7 +272,7 @@ function d4w_service_meta_box( $post ) {
 function d4w_project_meta_box( $post ) {
 	wp_nonce_field( 'd4w_save_meta', 'd4w_meta_nonce' );
 	d4w_meta_field( $post->ID, '_d4w_client', __( 'Client', 'design4web' ) );
-	d4w_meta_field( $post->ID, '_d4w_year', __( 'Year / period', 'design4web' ), 'text', __( 'Example: 2026 or Archive', 'design4web' ) );
+	d4w_meta_field( $post->ID, '_d4w_year', __( 'Year / period', 'design4web' ), 'text', __( 'Example: 2026 or Recent', 'design4web' ) );
 	d4w_meta_field( $post->ID, '_d4w_url', __( 'Project URL', 'design4web' ), 'url' );
 	d4w_meta_field( $post->ID, '_d4w_industry', __( 'Industry', 'design4web' ) );
 	d4w_meta_field( $post->ID, '_d4w_services', __( 'Services delivered', 'design4web' ), 'text', __( 'Example: Strategy, UX, WordPress', 'design4web' ) );

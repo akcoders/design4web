@@ -26,7 +26,7 @@ $is_term = is_tax( 'd4w_project_type' );
 				while ( have_posts() ) :
 					the_post();
 					$project_index = (int) $wp_query->current_post + 1;
-					$image         = d4w_feature_image_url( get_the_ID(), 'project-' . ( ( ( $project_index - 1 ) % 5 ) + 1 ) . '.jpg', 'd4w-project' );
+					$image         = d4w_feature_image_url( get_the_ID(), 'project-' . ( ( ( $project_index - 1 ) % 5 ) + 1 ) . '.jpg', 'full' );
 					$summary       = d4w_card_excerpt( get_the_ID(), 12 );
 					?>
 					<article class="d4w-work-card d4w-client-card">

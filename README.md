@@ -1,10 +1,10 @@
 # Design4Web Studio
 
-A custom, multipage, motion-first WordPress theme built for Design4web. Version 3.4 rebuilds the Clients archive as a reference-faithful, image-led portfolio with an equal two-column desktop feed, a single-column mobile feed and clean image-zoom interactions while retaining the logo-led header/footer and live Google review option.
+A custom, multipage, motion-first WordPress theme built for Design4web. Version 3.5 refreshes the Clients collection with 19 verified recent projects, locally bundled website previews, an equal two-column desktop feed, a single-column mobile feed and clean image-zoom interactions while retaining the logo-led header/footer and live Google review option.
 
 ## Install or update
 
-The ready-to-upload release is `design4web-studio-3.4.0.zip`.
+The ready-to-upload release is `design4web-studio-3.5.0.zip`.
 
 1. Download the ZIP without extracting it.
 2. Open **WordPress Admin → Appearance → Themes → Add New → Upload Theme**.
@@ -14,7 +14,7 @@ The ready-to-upload release is `design4web-studio-3.4.0.zip`.
 6. Visit the homepage or WordPress dashboard once so the safe content migration can complete.
 7. Open **Appearance → Design4web Options** for the editing dashboard.
 
-The theme safely creates Home, About, Services, Products, Work, Pricing, Journal and Contact destinations where needed. The v3 migration seeds missing service/product/pricing/social starter content, preserves existing posts and user-edited records, and adds the six product pages below Products. The primary navigation is maintained as Home, About, Services, Products, Clients, Testimonial and Contact Us; Products keeps its dynamic dropdown while Clients opens the Work archive and Testimonial jumps to the homepage review collection.
+The theme safely creates Home, About, Services, Products, Work, Pricing, Journal and Contact destinations where needed. The v3.5 migration intentionally replaces the previous project collection with the 19 approved recent works, creates editable project records and featured previews, and preserves other content types. The primary navigation is maintained as Home, About, Services, Products, Clients, Testimonial and Contact Us; Products keeps its dynamic dropdown while Clients opens the Work collection and Testimonial jumps to the homepage review collection.
 
 ## Dynamic admin content
 
@@ -28,7 +28,7 @@ The theme safely creates Home, About, Services, Products, Work, Pricing, Journal
 - **Process Steps** — title, description, number, icon and order.
 - **FAQs** — question, answer, category and order.
 - **Team** — name, role, biography, photo, email, LinkedIn and order.
-- **Posts** — the Journal archive and article pages use normal WordPress posts.
+- **Posts** — the Journal listing and article pages use normal WordPress posts.
 - **Enquiries** — every valid form submission is saved privately for administrators before the email notification is attempted.
 
 Global colors, section copy, statistics, Google review/profile URL, map embed URL, contact details, social links, section visibility and motion settings are under **Appearance → Customize → Design4web Theme Options**. Navigation is managed under **Appearance → Menus**. Logo and site icon use **Site Identity**.
@@ -37,13 +37,13 @@ Global colors, section copy, statistics, Google review/profile URL, map embed UR
 
 - Homepage
 - About
-- Services archive and dynamic service detail pages
-- Products archive and six dynamic product detail pages
+- Services listing and dynamic service detail pages
+- Products listing and six dynamic product detail pages
 - Creative pricing page with an editable plan-mode toggle
-- Responsive, image-led Clients/Work archive with a two-column desktop feed, a single-column mobile feed and dynamic case studies
-- Journal archive and article pages
+- Responsive, image-led Clients/Work collection with a two-column desktop feed, a single-column mobile feed and dynamic case studies
+- Journal listing and article pages
 - Contact and FAQ page
-- Standard page, archive, search/404 and comment templates
+- Standard page, listing, search/404 and comment templates
 
 ## Motion system
 
@@ -83,4 +83,4 @@ The AJAX form validates and sanitizes input, verifies a nonce, uses a honeypot a
 
 ## Content and assets
 
-Legacy portfolio imagery in `assets/images/legacy` came from the client-owned Design4web website and is stored locally instead of hotlinked. Assigning a Featured Image to a project replaces its bundled fallback automatically. The Agenca and AiSensy references informed interaction pacing, information architecture and product grouping only; their proprietary code, copy and demo assets are not included.
+Recent project previews in `assets/images/clients` were captured from the approved live client websites and are stored locally instead of hotlinked. The migration also adds them to the Media Library when uploads are writable. Assigning a Featured Image to a project replaces its bundled fallback automatically. The Agenca and AiSensy references informed interaction pacing, information architecture and product grouping only; their proprietary code, copy and demo assets are not included.
