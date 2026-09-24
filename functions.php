@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'D4W_VERSION', '3.6.0' );
+define( 'D4W_VERSION', '3.7.0' );
 define( 'D4W_DIR', get_template_directory() );
 define( 'D4W_URI', get_template_directory_uri() );
 
@@ -94,12 +94,35 @@ function d4w_document_meta() {
 	if ( defined( 'WPSEO_VERSION' ) || defined( 'RANK_MATH_VERSION' ) ) {
 		return;
 	}
-	$description = is_front_page() ? d4w_get_option( 'hero_text' ) : '';
+	$description = is_front_page() ? d4w_get_option( 'og_description', d4w_get_option( 'hero_text' ) ) : d4w_get_option( 'og_description' );
 	if ( is_singular() && has_excerpt() ) {
 		$description = get_the_excerpt();
 	}
+	if ( ! $description ) {
+		$description = d4w_get_option( 'hero_text' );
+	}
 	if ( $description ) {
 		echo '<meta name="description" content="' . esc_attr( wp_strip_all_tags( $description ) ) . '">' . "\n";
+	}
+	if ( d4w_get_option( 'enable_og_tags', true ) ) {
+		$title = is_front_page() && d4w_get_option( 'og_title' ) ? d4w_get_option( 'og_title' ) : wp_get_document_title();
+		$url   = is_singular() ? get_permalink() : home_url( '/' );
+		$type  = is_singular( array( 'post', 'd4w_project' ) ) ? 'article' : 'website';
+		$image = is_singular() && has_post_thumbnail() ? get_the_post_thumbnail_url( get_the_ID(), 'full' ) : '';
+		if ( ! $image ) {
+			$image = d4w_option_image_url( 'og_default_image', 'logo.png', 'full' );
+		}
+		echo '<meta property="og:locale" content="en_IN">' . "\n";
+		echo '<meta property="og:type" content="' . esc_attr( $type ) . '">' . "\n";
+		echo '<meta property="og:site_name" content="' . esc_attr( get_bloginfo( 'name' ) ) . '">' . "\n";
+		echo '<meta property="og:title" content="' . esc_attr( $title ) . '">' . "\n";
+		echo '<meta property="og:description" content="' . esc_attr( wp_strip_all_tags( $description ) ) . '">' . "\n";
+		echo '<meta property="og:url" content="' . esc_url( $url ) . '">' . "\n";
+		echo '<meta property="og:image" content="' . esc_url( $image ) . '">' . "\n";
+		echo '<meta name="twitter:card" content="summary_large_image">' . "\n";
+		echo '<meta name="twitter:title" content="' . esc_attr( $title ) . '">' . "\n";
+		echo '<meta name="twitter:description" content="' . esc_attr( wp_strip_all_tags( $description ) ) . '">' . "\n";
+		echo '<meta name="twitter:image" content="' . esc_url( $image ) . '">' . "\n";
 	}
 	if ( is_front_page() ) {
 		$schema = array(
@@ -110,12 +133,37 @@ function d4w_document_meta() {
 			'email'    => d4w_get_option( 'contact_email' ),
 			'telephone'=> d4w_get_option( 'phone' ),
 			'areaServed' => 'India',
-			'sameAs'   => array_values( array_filter( array( d4w_get_option( 'facebook_url' ), d4w_get_option( 'twitter_url' ), d4w_get_option( 'instagram_url' ), d4w_get_option( 'linkedin_url' ) ) ) ),
+			'sameAs'   => array_values( array_filter( array( d4w_get_option( 'facebook_url' ), d4w_get_option( 'twitter_url' ), d4w_get_option( 'instagram_url' ), d4w_get_option( 'youtube_url' ), d4w_get_option( 'linkedin_url' ) ) ) ),
 		);
 		echo '<script type="application/ld+json">' . wp_json_encode( $schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) . '</script>' . "\n";
 	}
 }
 add_action( 'wp_head', 'd4w_document_meta', 4 );
+
+function d4w_favicon_meta() {
+	$favicon_id = absint( d4w_get_option( 'favicon' ) );
+	if ( ! $favicon_id ) {
+		return;
+	}
+	$favicon = wp_get_attachment_image_url( $favicon_id, 'full' );
+	if ( $favicon ) {
+		echo '<link rel="icon" href="' . esc_url( $favicon ) . '">' . "\n";
+		echo '<link rel="apple-touch-icon" href="' . esc_url( $favicon ) . '">' . "\n";
+	}
+}
+add_action( 'wp_head', 'd4w_favicon_meta', 3 );
+
+function d4w_google_analytics_tag() {
+	$measurement_id = d4w_sanitize_ga_id( d4w_get_option( 'google_analytics_id' ) );
+	if ( ! $measurement_id ) {
+		return;
+	}
+	?>
+	<script async src="https://www.googletagmanager.com/gtag/js?id=<?php echo esc_attr( $measurement_id ); ?>"></script>
+	<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','<?php echo esc_js( $measurement_id ); ?>');</script>
+	<?php
+}
+add_action( 'wp_head', 'd4w_google_analytics_tag', 30 );
 
 function d4w_register_content_types() {
 	register_post_type(

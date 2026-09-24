@@ -21,13 +21,9 @@ while ( have_posts() ) :
 
 		<section class="d4w-about-story section-space-sm">
 			<div class="container-fluid d4w-shell">
-				<div class="row g-5 align-items-center">
+				<div class="row g-5 align-items-stretch">
 					<div class="col-lg-6">
-						<div class="d4w-about-collage reveal-up">
-							<div class="d4w-image-curtain"><img src="<?php echo esc_url( D4W_URI . '/assets/images/service-web-design.jpg' ); ?>" alt="<?php esc_attr_e( 'Design process', 'design4web' ); ?>" width="720" height="620"></div>
-							<div class="d4w-image-curtain"><img src="<?php echo esc_url( D4W_URI . '/assets/images/service-development.jpg' ); ?>" alt="<?php esc_attr_e( 'Development process', 'design4web' ); ?>" width="720" height="620" loading="lazy"></div>
-							<span><?php esc_html_e( 'Strategy × Craft × Care', 'design4web' ); ?></span>
-						</div>
+						<figure class="d4w-about-portrait d4w-image-curtain reveal-up"><img src="<?php echo esc_url( d4w_option_image_url( 'about_story_image', 'service-web-design.jpg', 'full' ) ); ?>" alt="<?php esc_attr_e( 'Design4web creative team collaborating on a digital project', 'design4web' ); ?>" width="720" height="900"><figcaption><?php esc_html_e( 'Strategy × Craft × Care', 'design4web' ); ?></figcaption></figure>
 					</div>
 					<div class="col-lg-5 offset-lg-1"><p class="d4w-section-label reveal-up"><span>01</span><?php esc_html_e( 'Our story', 'design4web' ); ?></p><h2 class="d4w-display reveal-text"><?php echo esc_html( d4w_get_option( 'about_title' ) ); ?></h2><div class="entry-content d4w-prose reveal-up"><?php the_content(); ?></div><a class="d4w-text-link reveal-up" href="<?php echo esc_url( get_post_type_archive_link( 'd4w_service' ) ); ?>"><?php esc_html_e( 'Explore our services', 'design4web' ); ?><i class="bi bi-arrow-right"></i></a></div>
 				</div>

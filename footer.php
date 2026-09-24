@@ -6,18 +6,34 @@
  */
 $socials = array(
 	'facebook_url'  => array( 'Facebook', 'bi-facebook' ),
-	'twitter_url'   => array( 'X / Twitter', 'bi-twitter-x' ),
 	'instagram_url' => array( 'Instagram', 'bi-instagram' ),
+	'youtube_url'   => array( 'YouTube', 'bi-youtube' ),
 	'linkedin_url'  => array( 'LinkedIn', 'bi-linkedin' ),
 );
 $footer_services = get_posts(
 	array(
 		'post_type'      => 'd4w_service',
 		'post_status'    => 'publish',
-		'posts_per_page' => 5,
+		'posts_per_page' => 4,
 		'orderby'        => array( 'menu_order' => 'ASC', 'date' => 'ASC' ),
 		'no_found_rows'  => true,
 	)
+);
+$footer_products = get_posts(
+	array(
+		'post_type'      => 'd4w_product',
+		'post_status'    => 'publish',
+		'posts_per_page' => 4,
+		'orderby'        => array( 'menu_order' => 'ASC', 'date' => 'ASC' ),
+		'no_found_rows'  => true,
+	)
+);
+$explore_links = array(
+	__( 'Home', 'design4web' )         => home_url( '/' ),
+	__( 'Clients', 'design4web' )      => get_post_type_archive_link( 'd4w_project' ),
+	__( 'Case Studies', 'design4web' ) => home_url( '/#case-studies' ),
+	__( 'Testimonials', 'design4web' ) => home_url( '/#reviews' ),
+	__( 'Contact Us', 'design4web' )   => d4w_page_url( 'contact', home_url( '/#contact' ) ),
 );
 ?>
 </main>
@@ -33,10 +49,8 @@ $footer_services = get_posts(
 			<a class="d4w-footer-cta__button magnetic" href="<?php echo esc_url( d4w_page_url( 'contact', home_url( '/#contact' ) ) ); ?>"><span><?php esc_html_e( 'Start a project', 'design4web' ); ?></span><i class="bi bi-arrow-up-right"></i></a>
 		</div>
 
-		<div class="d4w-footer-marquee" aria-hidden="true"><div><span>DESIGN <i>✦</i> BUILD <i>✦</i> GROW <i>✦</i></span><span>DESIGN <i>✦</i> BUILD <i>✦</i> GROW <i>✦</i></span></div></div>
-
-		<div class="d4w-footer-grid">
-			<div class="d4w-footer-brand">
+		<div class="d4w-footer-grid d4w-footer-grid--v2">
+			<div class="d4w-footer-brand d4w-footer-brand--wide">
 				<a class="d4w-logo d4w-footer-logo" href="<?php echo esc_url( home_url( '/' ) ); ?>">
 					<?php if ( has_custom_logo() ) : ?>
 						<?php echo wp_get_attachment_image( get_theme_mod( 'custom_logo' ), 'full', false, array( 'class' => 'custom-logo', 'alt' => get_bloginfo( 'name' ) ) ); ?>
@@ -45,32 +59,11 @@ $footer_services = get_posts(
 					<?php endif; ?>
 				</a>
 				<p class="footer-intro"><?php echo esc_html( d4w_get_option( 'footer_intro' ) ); ?></p>
-				<span class="d4w-footer-status"><i></i><?php esc_html_e( 'Available for selected projects', 'design4web' ); ?></span>
-			</div>
-			<div class="d4w-footer-nav">
-				<p class="footer-label"><?php esc_html_e( 'Explore', 'design4web' ); ?></p>
-				<?php
-				wp_nav_menu(
-					array(
-						'theme_location' => 'footer',
-						'container'      => false,
-						'menu_class'     => 'footer-menu',
-						'fallback_cb'    => 'd4w_primary_menu_fallback',
-						'depth'          => 1,
-					)
-				);
-				?>
-			</div>
-			<?php if ( $footer_services ) : ?>
-				<div class="d4w-footer-services">
-					<p class="footer-label"><?php esc_html_e( 'Capabilities', 'design4web' ); ?></p>
-					<ul><?php foreach ( $footer_services as $footer_service ) : ?><li><a href="<?php echo esc_url( get_permalink( $footer_service ) ); ?>"><?php echo esc_html( get_the_title( $footer_service ) ); ?><i class="bi bi-arrow-up-right"></i></a></li><?php endforeach; ?></ul>
+				<div class="d4w-footer-contact-links">
+					<a href="tel:<?php echo esc_attr( preg_replace( '/[^0-9+]/', '', d4w_get_option( 'phone' ) ) ); ?>"><i class="bi bi-telephone"></i><span><?php echo esc_html( d4w_get_option( 'phone' ) ); ?></span></a>
+					<a href="mailto:<?php echo esc_attr( d4w_get_option( 'contact_email' ) ); ?>"><i class="bi bi-envelope"></i><span><?php echo esc_html( d4w_get_option( 'contact_email' ) ); ?></span></a>
 				</div>
-			<?php endif; ?>
-			<div class="d4w-footer-contact">
-				<p class="footer-label"><?php esc_html_e( 'Say hello', 'design4web' ); ?></p>
-				<a class="footer-email" href="mailto:<?php echo esc_attr( d4w_get_option( 'contact_email' ) ); ?>"><?php echo esc_html( d4w_get_option( 'contact_email' ) ); ?></a>
-				<a class="footer-phone" href="tel:<?php echo esc_attr( preg_replace( '/[^0-9+]/', '', d4w_get_option( 'phone' ) ) ); ?>"><?php echo esc_html( d4w_get_option( 'phone' ) ); ?></a>
+				<p class="d4w-footer-follow-label"><?php esc_html_e( 'Follow us', 'design4web' ); ?></p>
 				<div class="footer-socials">
 					<?php foreach ( $socials as $key => $social ) : ?>
 						<?php if ( d4w_get_option( $key ) ) : ?>
@@ -79,14 +72,23 @@ $footer_services = get_posts(
 					<?php endforeach; ?>
 				</div>
 			</div>
-		</div>
-
-		<div class="d4w-footer-word" aria-hidden="true">DESIGN4WEB</div>
-		<div class="footer-bottom">
-			<p>&copy; <?php echo esc_html( wp_date( 'Y' ) ); ?> <?php bloginfo( 'name' ); ?>. <?php esc_html_e( 'All rights reserved.', 'design4web' ); ?></p>
-			<p><?php esc_html_e( 'Designed & developed in India', 'design4web' ); ?> <span aria-hidden="true">✦</span></p>
+			<div class="d4w-footer-column d4w-footer-nav">
+				<p class="footer-label"><?php esc_html_e( 'Explore', 'design4web' ); ?></p>
+				<ul class="d4w-footer-list"><?php foreach ( $explore_links as $label => $url ) : ?><li><a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $label ); ?><i class="bi bi-arrow-up-right"></i></a></li><?php endforeach; ?></ul>
+			</div>
+			<div class="d4w-footer-column d4w-footer-column--services">
+				<p class="footer-label"><?php esc_html_e( 'Services', 'design4web' ); ?></p>
+				<a class="d4w-footer-all" href="<?php echo esc_url( get_post_type_archive_link( 'd4w_service' ) ); ?>"><?php esc_html_e( 'All Services', 'design4web' ); ?><i class="bi bi-arrow-right"></i></a>
+				<?php if ( $footer_services ) : ?><ul class="d4w-footer-list d4w-footer-list--secondary"><?php foreach ( $footer_services as $footer_service ) : ?><li><a href="<?php echo esc_url( get_permalink( $footer_service ) ); ?>"><?php echo esc_html( get_the_title( $footer_service ) ); ?></a></li><?php endforeach; ?></ul><?php endif; ?>
+			</div>
+			<div class="d4w-footer-column d4w-footer-column--products">
+				<p class="footer-label"><?php esc_html_e( 'Products', 'design4web' ); ?></p>
+				<a class="d4w-footer-all" href="<?php echo esc_url( get_post_type_archive_link( 'd4w_product' ) ); ?>"><?php esc_html_e( 'All Products', 'design4web' ); ?><i class="bi bi-arrow-right"></i></a>
+				<?php if ( $footer_products ) : ?><ul class="d4w-footer-list d4w-footer-list--secondary"><?php foreach ( $footer_products as $footer_product ) : ?><li><a href="<?php echo esc_url( get_permalink( $footer_product ) ); ?>"><?php echo esc_html( get_the_title( $footer_product ) ); ?></a></li><?php endforeach; ?></ul><?php endif; ?>
+			</div>
 		</div>
 	</div>
+	<div class="footer-bottom"><div class="container-fluid d4w-shell footer-bottom__inner"><p>&copy; <?php echo esc_html( wp_date( 'Y' ) ); ?> <?php bloginfo( 'name' ); ?>. <?php esc_html_e( 'All rights reserved.', 'design4web' ); ?></p><p><?php esc_html_e( 'Designed & developed in India', 'design4web' ); ?> <span aria-hidden="true">✦</span></p></div></div>
 </footer>
 
 <?php if ( d4w_get_option( 'whatsapp' ) ) : ?>

@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'D4W_SCHEMA_VERSION', '3.6.0' );
+define( 'D4W_SCHEMA_VERSION', '3.7.0' );
 
 /**
  * Find seeded content without relying on WP_Query's title handling. Titles
@@ -262,7 +262,7 @@ function d4w_attach_project_preview( $post_id, $filename, $title ) {
  * @return bool Whether the replacement completed successfully.
  */
 function d4w_upgrade_projects() {
-	$dataset_version = '3.5.0';
+	$dataset_version = '3.7.0';
 	if ( $dataset_version === get_option( 'd4w_recent_projects_version' ) ) {
 		return true;
 	}
@@ -281,6 +281,7 @@ function d4w_upgrade_projects() {
 
 	$projects = array(
 		array( 'AndBeyond.Media', 'and-beyond-media', 'and-beyond-media.jpg', 'https://andbeyond.media/', 'AdTech & Programmatic Advertising', 'Website design, responsive development, content architecture', array( 'Web Design', 'AdTech' ), 'An image-led corporate platform presenting programmatic advertising, monetisation tools and publisher-focused ad technology.', 'Organise a technically detailed advertising offer into a confident website that works for publishers, brands and partners.' ),
+		array( 'DreamDrip by Seh', 'dreamdrip-by-seh', 'dreamdrip-by-seh.jpg', 'https://dreamdripbyseh.com/', 'Sleepwear & Loungewear', 'Shopify design, e-commerce UX, responsive development', array( 'Web Design', 'E-Commerce' ), 'A soft, elegant Shopify experience for women’s sleepwear and loungewear, built around visual discovery and effortless shopping.', 'Translate a comfort-led fashion brand into a polished storefront that balances product storytelling, collection browsing and mobile conversion.' ),
 		array( 'Madhya Pradesh State Rifle Association', 'mpsra', 'mpsra.jpg', 'https://mpsra.org.in/', 'Sports Association', 'Website design, WordPress development, information architecture', array( 'Web Design', 'Sports' ), 'A responsive association website connecting athletes with shooting events, training information and organisational updates.', 'Make competitions, notices, training pathways and association information easy to discover across devices.' ),
 		array( 'HospyKare', 'hospykare', 'hospykare.jpg', 'https://www.hospykare.com/', 'Healthcare & Medical Travel', 'Website design, responsive development, conversion journeys', array( 'Web Design', 'Healthcare' ), 'A healthcare platform presenting medical travel assistance, hospital access and coordinated patient-support services.', 'Build clarity and trust around a multi-step healthcare journey for patients seeking dependable treatment support.' ),
 		array( 'Langwarrin Health Clinic', 'langwarrin-health-clinic', 'langwarrin-health-clinic.jpg', 'https://langwarrinhealthclinic.com/', 'Primary Healthcare', 'Website design, WordPress development, appointment journeys', array( 'Web Design', 'Healthcare' ), 'A patient-friendly clinic website for doctors, services, billing information, opening hours and appointment access.', 'Help local patients quickly find care information and the right path to contact or book with the clinic.' ),
@@ -843,6 +844,14 @@ function d4w_run_schema_upgrade() {
 	d4w_upgrade_growth_supporting_content();
 	d4w_upgrade_supporting_content();
 	d4w_upgrade_site_structure();
+	if ( '1.0' !== get_option( 'd4w_footer_content_version' ) ) {
+		set_theme_mod( 'd4w_footer_intro', 'We are a web designing and digital marketing company focused on results, growth and innovation. From crafting a conversion-driven website to amplifying your social reach, our digital experts help you reach new heights in the digital space.' );
+		set_theme_mod( 'd4w_instagram_url', 'https://www.instagram.com/designforwebdevelopment/' );
+		set_theme_mod( 'd4w_facebook_url', 'https://www.facebook.com/designforwebdevelopment' );
+		set_theme_mod( 'd4w_youtube_url', 'https://www.youtube.com/@designforwebdevelopment' );
+		set_theme_mod( 'd4w_linkedin_url', 'https://www.linkedin.com/company/design4webdevelopment/' );
+		update_option( 'd4w_footer_content_version', '1.0' );
+	}
 	if ( '1.0' !== get_option( 'd4w_whatsapp_destination_version' ) ) {
 		set_theme_mod( 'd4w_whatsapp', '917718958220' );
 		set_theme_mod( 'd4w_whatsapp_message', 'Hi' );

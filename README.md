@@ -1,10 +1,10 @@
 # Design4Web Studio
 
-A custom, multipage, motion-first WordPress theme built for Design4web. Version 3.6 turns the homepage Work collection into a responsive, swipe-ready carousel with two visible projects on desktop and one on mobile. Full website previews stay uncropped, while the admin-managed WhatsApp button now opens the requested click-to-chat destination with a pre-filled message.
+A custom, multipage, motion-first WordPress theme built for Design4web. Version 3.7 introduces a responsive four-column footer, admin-managed social/SEO/analytics/media settings, visual section headings, an edge-to-edge About story portrait and DreamDrip by Seh as the second client project. The homepage Work carousel keeps full website previews uncropped on desktop and mobile.
 
 ## Install or update
 
-The ready-to-upload release is `design4web-studio-3.6.0.zip`.
+The ready-to-upload release is `design4web-studio-3.7.0.zip`.
 
 1. Download the ZIP without extracting it.
 2. Open **WordPress Admin → Appearance → Themes → Add New → Upload Theme**.

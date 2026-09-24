@@ -68,6 +68,25 @@ function d4w_whatsapp_url() {
 }
 
 /**
+ * Return an admin-selected theme image with a bundled fallback.
+ *
+ * @param string $key      Theme option key containing an attachment ID.
+ * @param string $fallback Path relative to assets/images.
+ * @param string $size     WordPress image size.
+ * @return string
+ */
+function d4w_option_image_url( $key, $fallback, $size = 'large' ) {
+	$attachment_id = absint( d4w_get_option( $key ) );
+	if ( $attachment_id ) {
+		$image = wp_get_attachment_image_url( $attachment_id, $size );
+		if ( $image ) {
+			return $image;
+		}
+	}
+	return D4W_URI . '/assets/images/' . ltrim( $fallback, '/' );
+}
+
+/**
  * Render the shared AJAX enquiry form.
  *
  * @param string $context Unique form context.

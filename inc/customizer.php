@@ -49,7 +49,7 @@ function d4w_defaults() {
 		'insights_title'       => 'Useful thinking for ambitious digital brands.',
 		'cta_title'            => 'Have a project in mind? Let’s create something people remember.',
 		'cta_text'             => 'Tell us what you are building. We will bring the right mix of strategy, creativity and technology.',
-		'footer_intro'         => 'Websites, brands and digital systems created with curiosity, precision and a very human point of view.',
+		'footer_intro'         => 'We are a web designing and digital marketing company focused on results, growth and innovation. From crafting a conversion-driven website to amplifying your social reach, our digital experts help you reach new heights in the digital space.',
 		'footer_cta_title'     => 'Have an idea worth building? Let’s make it impossible to ignore.',
 		'phone'                => '+91 99679 96645',
 		'whatsapp'             => '917718958220',
@@ -58,10 +58,24 @@ function d4w_defaults() {
 		'address'              => "7A/B, 1st Floor, Adugiya Compound\nNear Darshan Photo Studio, Mamletdarwadi Main Road\nMalad West, Mumbai 400064, Maharashtra, India",
 		'facebook_url'         => 'https://www.facebook.com/designforwebdevelopment',
 		'twitter_url'          => 'https://twitter.com/design4website',
-		'instagram_url'        => '',
-		'linkedin_url'         => '',
+		'instagram_url'        => 'https://www.instagram.com/designforwebdevelopment/',
+		'youtube_url'          => 'https://www.youtube.com/@designforwebdevelopment',
+		'linkedin_url'         => 'https://www.linkedin.com/company/design4webdevelopment/',
 		'google_reviews_url'    => 'https://www.google.com/maps/search/?api=1&query=Design4web+Malad+West+Mumbai',
 		'google_map_embed_url'  => '',
+		'enable_og_tags'        => true,
+		'google_analytics_id'   => '',
+		'og_title'              => '',
+		'og_description'        => '',
+		'favicon'               => 0,
+		'og_default_image'      => 0,
+		'about_story_image'     => 0,
+		'services_section_image'=> 0,
+		'products_section_image'=> 0,
+		'work_section_image'    => 0,
+		'case_section_image'    => 0,
+		'insights_section_image'=> 0,
+		'social_section_image'  => 0,
 		'show_services'        => true,
 		'show_products'        => true,
 		'show_projects'        => true,
@@ -83,6 +97,11 @@ function d4w_sanitize_checkbox( $checked ) {
 	return (bool) $checked;
 }
 
+function d4w_sanitize_ga_id( $value ) {
+	$value = strtoupper( trim( (string) $value ) );
+	return preg_match( '/^G-[A-Z0-9]+$/', $value ) ? $value : '';
+}
+
 function d4w_customize_register( $wp_customize ) {
 	$wp_customize->add_panel(
 		'd4w_options',
@@ -99,6 +118,7 @@ function d4w_customize_register( $wp_customize ) {
 		'about'   => array( 'About & Statistics', 30 ),
 		'home'    => array( 'Homepage Sections', 40 ),
 		'contact' => array( 'Contact & Social', 50 ),
+		'seo'     => array( 'SEO, Analytics & Favicon', 60 ),
 	);
 	foreach ( $sections as $id => $section ) {
 		$wp_customize->add_section(
@@ -136,6 +156,7 @@ function d4w_customize_register( $wp_customize ) {
 		'show_testimonials' => array( 'Show testimonials section', 'd4w_home' ),
 		'show_social'       => array( 'Show social feed section', 'd4w_home' ),
 		'show_blog'         => array( 'Show blog section', 'd4w_home' ),
+		'enable_og_tags'    => array( 'Enable Open Graph and social sharing tags', 'd4w_seo' ),
 	);
 	foreach ( $checkboxes as $id => $data ) {
 		$wp_customize->add_setting( 'd4w_' . $id, array( 'default' => true, 'sanitize_callback' => 'd4w_sanitize_checkbox' ) );
@@ -177,6 +198,9 @@ function d4w_customize_register( $wp_customize ) {
 		'whatsapp_message'    => array( 'WhatsApp pre-filled message', 'd4w_contact', 'text' ),
 		'contact_email'       => array( 'Contact email', 'd4w_contact', 'email' ),
 		'address'             => array( 'Location / address', 'd4w_contact', 'textarea' ),
+		'google_analytics_id' => array( 'Google Analytics 4 Measurement ID (G-XXXXXXXX)', 'd4w_seo', 'text' ),
+		'og_title'            => array( 'Default social sharing title (optional)', 'd4w_seo', 'text' ),
+		'og_description'      => array( 'Default social sharing description (optional)', 'd4w_seo', 'textarea' ),
 	);
 	$defaults = d4w_defaults();
 	foreach ( $text_fields as $id => $data ) {
@@ -188,6 +212,9 @@ function d4w_customize_register( $wp_customize ) {
 		} elseif ( 'number' === $data[2] ) {
 			$sanitize = 'absint';
 		}
+		if ( 'google_analytics_id' === $id ) {
+			$sanitize = 'd4w_sanitize_ga_id';
+		}
 		$wp_customize->add_setting( 'd4w_' . $id, array( 'default' => $defaults[ $id ], 'sanitize_callback' => $sanitize ) );
 		$wp_customize->add_control( 'd4w_' . $id, array( 'label' => __( $data[0], 'design4web' ), 'section' => $data[1], 'type' => $data[2] ) );
 	}
@@ -198,6 +225,7 @@ function d4w_customize_register( $wp_customize ) {
 		'facebook_url'       => array( 'Facebook URL', 'd4w_contact' ),
 		'twitter_url'        => array( 'X / Twitter URL', 'd4w_contact' ),
 		'instagram_url'      => array( 'Instagram URL', 'd4w_contact' ),
+		'youtube_url'        => array( 'YouTube URL', 'd4w_contact' ),
 		'linkedin_url'       => array( 'LinkedIn URL', 'd4w_contact' ),
 		'google_reviews_url' => array( 'Google reviews / business profile URL', 'd4w_contact' ),
 		'google_map_embed_url' => array( 'Google Maps embed URL (optional)', 'd4w_contact' ),
@@ -205,6 +233,33 @@ function d4w_customize_register( $wp_customize ) {
 	foreach ( $url_fields as $id => $data ) {
 		$wp_customize->add_setting( 'd4w_' . $id, array( 'default' => $defaults[ $id ], 'sanitize_callback' => 'esc_url_raw' ) );
 		$wp_customize->add_control( 'd4w_' . $id, array( 'label' => __( $data[0], 'design4web' ), 'section' => $data[1], 'type' => 'url' ) );
+	}
+
+	$media_fields = array(
+		'favicon'                => array( 'Favicon / browser icon', 'd4w_seo', 'Select favicon' ),
+		'og_default_image'       => array( 'Default Open Graph sharing image', 'd4w_seo', 'Select social image' ),
+		'about_story_image'      => array( 'About page portrait image', 'd4w_about', 'Select portrait' ),
+		'services_section_image' => array( 'Services heading visual', 'd4w_home', 'Select services visual' ),
+		'products_section_image' => array( 'Products heading visual', 'd4w_home', 'Select products visual' ),
+		'work_section_image'     => array( 'Work heading visual', 'd4w_home', 'Select work visual' ),
+		'case_section_image'     => array( 'Case studies heading visual', 'd4w_home', 'Select case study visual' ),
+		'insights_section_image' => array( 'Insights heading visual', 'd4w_home', 'Select insights visual' ),
+		'social_section_image'   => array( 'Social heading visual', 'd4w_home', 'Select social visual' ),
+	);
+	foreach ( $media_fields as $id => $data ) {
+		$wp_customize->add_setting( 'd4w_' . $id, array( 'default' => $defaults[ $id ], 'sanitize_callback' => 'absint' ) );
+		$wp_customize->add_control(
+			new WP_Customize_Media_Control(
+				$wp_customize,
+				'd4w_' . $id,
+				array(
+					'label'       => __( $data[0], 'design4web' ),
+					'section'     => $data[1],
+					'mime_type'   => 'image',
+					'button_labels'=> array( 'select' => __( $data[2], 'design4web' ) ),
+				)
+			)
+		);
 	}
 }
 add_action( 'customize_register', 'd4w_customize_register' );
